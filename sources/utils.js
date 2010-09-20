@@ -19,45 +19,6 @@
 
 miniLOL.utils = {
     XML: {
-        getElementById: function (id) {
-            var result;
-
-            $A(this.getElementsByTagName('*')).each(function (element) {
-                if (element.getAttribute('id') == id) {
-                    result = element;
-                    throw $break;
-                }
-            });
-
-            return result;
-        },
-
-        xpath: function (query) {
-            var result = [];
-            var tmp;
-
-            if (Prototype.Browser.IE) {
-                tmp = this.real.selectNodes(query);
-
-                for (var i = 0; i < tmp.length; i++) {
-                    result.push(tmp.item(i));
-                }
-            }
-            else {
-                tmp = (this.ownerDocument || this).evaluate(query, this, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-
-                for (var i = 0; i < tmp.snapshotLength; i++) {
-                    result.push(tmp.snapshotItem(i));
-                }
-            }
-
-            return result;
-        },
-
-        select: function (query) {
-            return Prototype.Selector.select(query, this);
-        },
-
         fix: function (obj) {
             if (!obj) {
                 return;
@@ -74,16 +35,18 @@ miniLOL.utils = {
 
                 obj.getElementById = function (id) {
                     return miniLOL.utils.XML.getElementById.call(this.real, id);
-                }
+                };
 
                 obj.real.setProperty('SelectionLanguage', 'XPath');
             }
             else if (!Prototype.Browser.Good) {
-                obj.getElementById = miniLOL.utils.XML.getElementById;
+                obj.getElementById = function (id) {
+                    return this.xpath("//*[@id='#{0}']".interpolate([id])).first();
+                };
             }
 
-            obj.xpath  = miniLOL.utils.XML.xpath;
-            obj.select = miniLOL.utils.XML.select;
+            obj.xpath  = Element.xpath;
+            obj.select = Element.select;
 
             return obj;
         },

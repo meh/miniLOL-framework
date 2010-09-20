@@ -333,14 +333,32 @@ Element.addMethods({
         element = (Object.isElement(element) || Object.isDocument(element)) ? element : this;
         query   = (Object.isElement(element) || Object.isDocument(element)) ? query : element;
 
-        return miniLOL.utils.XML.xpath.call(element, query);
+        var result = [];
+        var tmp;
+
+        if (Prototype.Browser.IE) {
+            tmp = element.real.selectNodes(query);
+
+            for (var i = 0; i < tmp.length; i++) {
+                result.push(tmp.item(i));
+            }
+        }
+        else {
+            tmp = (element.ownerDocument || element).evaluate(query, element, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+
+            for (var i = 0; i < tmp.snapshotLength; i++) {
+                result.push(tmp.snapshotItem(i));
+            }
+        }
+
+        return result;
     },
 
     select: function (element, query) {
         element = (Object.isElement(element) || Object.isDocument(element)) ? element : this;
         query   = (Object.isElement(element) || Object.isDocument(element)) ? query : element;
 
-        return miniLOL.utils.XML.select.call(element, query);
+        return Prototype.Selector.select(query, element);
     },
 
     getTextDescendants: function (element) {
@@ -418,45 +436,6 @@ if (!Object.isObject(window.miniLOL)) {
 
 miniLOL.utils = {
     XML: {
-        getElementById: function (id) {
-            var result;
-
-            $A(this.getElementsByTagName('*')).each(function (element) {
-                if (element.getAttribute('id') == id) {
-                    result = element;
-                    throw $break;
-                }
-            });
-
-            return result;
-        },
-
-        xpath: function (query) {
-            var result = [];
-            var tmp;
-
-            if (Prototype.Browser.IE) {
-                tmp = this.real.selectNodes(query);
-
-                for (var i = 0; i < tmp.length; i++) {
-                    result.push(tmp.item(i));
-                }
-            }
-            else {
-                tmp = (this.ownerDocument || this).evaluate(query, this, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-
-                for (var i = 0; i < tmp.snapshotLength; i++) {
-                    result.push(tmp.snapshotItem(i));
-                }
-            }
-
-            return result;
-        },
-
-        select: function (query) {
-            return Prototype.Selector.select(query, this);
-        },
-
         fix: function (obj) {
             if (!obj) {
                 return;
@@ -473,16 +452,18 @@ miniLOL.utils = {
 
                 obj.getElementById = function (id) {
                     return miniLOL.utils.XML.getElementById.call(this.real, id);
-                }
+                };
 
                 obj.real.setProperty('SelectionLanguage', 'XPath');
             }
             else if (!Prototype.Browser.Good) {
-                obj.getElementById = miniLOL.utils.XML.getElementById;
+                obj.getElementById = function (id) {
+                    return this.xpath("//*[@id='#{0}']".interpolate([id])).first();
+                };
             }
 
-            obj.xpath  = miniLOL.utils.XML.xpath;
-            obj.select = miniLOL.utils.XML.select;
+            obj.xpath  = Element.xpath;
+            obj.select = Element.select;
 
             return obj;
         },
@@ -1095,7 +1076,12 @@ miniLOL.Cookie = {
 miniLOL.Storage = Class.create({
     initialize: function (name, backend) {
         this.name    = name;
-        this.backend = new (backend || miniLOL.Storage.Backends.available())(name);
+
+        this.backend = (miniLOL.Storage.Instances[name])
+            ? miniLOL.Storage.Instances[name]
+            : new (backend || miniLOL.Storage.Backends.available())(name);
+
+        miniLOL.Storage.Instances[name] = this.backend;
     },
 
     get: function (key) {
@@ -1122,6 +1108,8 @@ miniLOL.Storage = Class.create({
         this.backend.save();
     }
 });
+
+miniLOL.Storage.Instances = {};
 
 miniLOL.Storage.Backend = Class.create(miniLOL.JSON, {
     initialize: function ($super, name, data) {

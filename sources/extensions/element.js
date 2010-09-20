@@ -31,14 +31,32 @@ Element.addMethods({
         element = (Object.isElement(element) || Object.isDocument(element)) ? element : this;
         query   = (Object.isElement(element) || Object.isDocument(element)) ? query : element;
 
-        return miniLOL.utils.XML.xpath.call(element, query);
+        var result = [];
+        var tmp;
+
+        if (Prototype.Browser.IE) {
+            tmp = element.real.selectNodes(query);
+
+            for (var i = 0; i < tmp.length; i++) {
+                result.push(tmp.item(i));
+            }
+        }
+        else {
+            tmp = (element.ownerDocument || element).evaluate(query, element, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+
+            for (var i = 0; i < tmp.snapshotLength; i++) {
+                result.push(tmp.snapshotItem(i));
+            }
+        }
+
+        return result;
     },
 
     select: function (element, query) {
         element = (Object.isElement(element) || Object.isDocument(element)) ? element : this;
         query   = (Object.isElement(element) || Object.isDocument(element)) ? query : element;
 
-        return miniLOL.utils.XML.select.call(element, query);
+        return Prototype.Selector.select(query, element);
     },
 
     getTextDescendants: function (element) {

@@ -20,7 +20,12 @@
 miniLOL.Storage = Class.create({
     initialize: function (name, backend) {
         this.name    = name;
-        this.backend = new (backend || miniLOL.Storage.Backends.available())(name);
+        
+        this.backend = (miniLOL.Storage.Instances[name])
+            ? miniLOL.Storage.Instances[name]
+            : new (backend || miniLOL.Storage.Backends.available())(name);
+
+        miniLOL.Storage.Instances[name] = this.backend;
     },
 
     get: function (key) {
@@ -47,6 +52,8 @@ miniLOL.Storage = Class.create({
         this.backend.save();
     }
 });
+
+miniLOL.Storage.Instances = {};
 
 miniLOL.Storage.Backend = Class.create(miniLOL.JSON, {
     initialize: function ($super, name, data) {
