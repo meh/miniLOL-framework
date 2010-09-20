@@ -85,6 +85,38 @@ Element.addMethods({
         return result;
     },
 
+    getFirstText: function (elements) {
+        elements = elements || this;
+
+        var result = '';
+
+        if (Object.isElement(elements)) {
+            elements = $A(elements.childNodes);
+        }
+        else if (!Object.isArray(elements)) {
+            elements = $A(elements);
+        }
+
+
+        elements.each(function (element) {
+            switch (element.nodeType) {
+                case Node.ELEMENT_NODE:
+                throw $break;
+                break;
+
+                case Node.CDATA_SECTION_NODE:
+                case Node.TEXT_NODE:
+                if (!element.nodeValue.blank()) {
+                    result = element.nodeValue.strip();
+                    throw $break;
+                }
+                break;
+            }
+        });
+
+        return result;
+    },
+
     toObject: function (element) {
         element = element || this;
 

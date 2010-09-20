@@ -387,6 +387,38 @@ Element.addMethods({
         return result;
     },
 
+    getFirstText: function (elements) {
+        elements = elements || this;
+
+        var result = '';
+
+        if (Object.isElement(elements)) {
+            elements = $A(elements.childNodes);
+        }
+        else if (!Object.isArray(elements)) {
+            elements = $A(elements);
+        }
+
+
+        elements.each(function (element) {
+            switch (element.nodeType) {
+                case Node.ELEMENT_NODE:
+                throw $break;
+                break;
+
+                case Node.CDATA_SECTION_NODE:
+                case Node.TEXT_NODE:
+                if (!element.nodeValue.blank()) {
+                    result = element.nodeValue.strip();
+                    throw $break;
+                }
+                break;
+            }
+        });
+
+        return result;
+    },
+
     toObject: function (element) {
         element = element || this;
 
@@ -427,6 +459,67 @@ Element.addMethods({
     }
 });
 
+if (!Object.isObject(window.Document)) {
+    window.Document = {};
+}
+
+Object.extend(Document, {
+    fix: function (obj) {
+        if (!obj) {
+            return;
+        }
+
+        if (Prototype.Browser.IE) {
+            obj = { real: obj };
+
+            obj.documentElement = obj.real.documentElement;
+
+            obj.getElementsByTagName = function (name) {
+                return this.real.getElementsByTagName(name);
+            };
+
+            obj.getElementById = function (id) {
+                return miniLOL.utils.XML.getElementById.call(this.real, id);
+            };
+
+            obj.real.setProperty('SelectionLanguage', 'XPath');
+        }
+        else if (!Prototype.Browser.Good) {
+            obj.getElementById = function (id) {
+                return this.xpath("//*[@id='#{0}']".interpolate([id])).first();
+            };
+        }
+
+        obj.xpath  = Element.xpath;
+        obj.select = Element.select;
+
+        return obj;
+    },
+
+    check: function (xml, path) {
+        var error = false;
+
+        if (!xml) {
+            error = 'There is a syntax error.';
+        }
+
+        if (xml.documentElement.nodeName == 'parsererror') {
+            error = xml.documentElement.textContent;
+        }
+
+        if (path && error) {
+            miniLOL.error('Error while parsing #{path}\n\n#{error}'.interpolate({
+                path:  path,
+                error: error
+            }), true);
+
+            return error;
+        }
+
+        return error;
+    }
+});
+
 if (!Object.isObject(window.miniLOL)) {
     window.miniLOL = {
         error: Prototype.emptyFunction
@@ -435,85 +528,6 @@ if (!Object.isObject(window.miniLOL)) {
 
 
 miniLOL.utils = {
-    XML: {
-        fix: function (obj) {
-            if (!obj) {
-                return;
-            }
-
-            if (Prototype.Browser.IE) {
-                obj = { real: obj };
-
-                obj.documentElement = obj.real.documentElement;
-
-                obj.getElementsByTagName = function (name) {
-                    return this.real.getElementsByTagName(name);
-                };
-
-                obj.getElementById = function (id) {
-                    return miniLOL.utils.XML.getElementById.call(this.real, id);
-                };
-
-                obj.real.setProperty('SelectionLanguage', 'XPath');
-            }
-            else if (!Prototype.Browser.Good) {
-                obj.getElementById = function (id) {
-                    return this.xpath("//*[@id='#{0}']".interpolate([id])).first();
-                };
-            }
-
-            obj.xpath  = Element.xpath;
-            obj.select = Element.select;
-
-            return obj;
-        },
-
-        check: function (xml, path) {
-            var error = false;
-
-            if (!xml) {
-                error = 'There is a syntax error.';
-            }
-
-            if (xml.documentElement.nodeName == 'parsererror') {
-                error = xml.documentElement.textContent;
-            }
-
-            if (path && error) {
-                miniLOL.error('Error while parsing #{path}\n\n#{error}'.interpolate({
-                    path:  path,
-                    error: error
-                }), true);
-
-                return error;
-            }
-
-            return error;
-        },
-
-        getFirstText: function (elements) {
-            var result = '';
-
-            (Object.isArray(elements) ? elements : $A(elements)).each(function (element) {
-                switch (element.nodeType) {
-                    case Node.ELEMENT_NODE:
-                    throw $break;
-                    break;
-
-                    case Node.CDATA_SECTION_NODE:
-                    case Node.TEXT_NODE:
-                    if (!element.nodeValue.blank()) {
-                        result = element.nodeValue.strip();
-                        throw $break;
-                    }
-                    break;
-                }
-            });
-
-            return result;
-        }
-    },
-
     exists: function (path) {
         var result = false;
 

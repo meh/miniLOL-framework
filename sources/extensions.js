@@ -21,3 +21,4 @@
 //= require "extensions/object"
 //= require "extensions/string"
 //= require "extensions/element"
+//= require "extensions/document"
