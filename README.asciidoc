@@ -1,0 +1,8 @@
+The miniLOL framework
+=====================
+
+The system parts of miniLOL are becoming more and more and I'm starting to need them even outside
+of miniLOL, so here it is, some miniLOL stuff usable out of context.
+
+It's obviously based on link:http://prototypejs.org[Prototype] and extends it with some useful stuff
+(useful to meh :).
