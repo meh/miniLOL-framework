@@ -37,11 +37,11 @@ module Helper
         return true
     end
 
-    def self.miniHeader (file)
+    def self.miniHeader (file, header)
         content = File.read(file)
 
         file = File.new(file, 'w');
-        file.puts '/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com] */'
+        file.puts header
         file.write content
         file.close
     end
@@ -92,13 +92,23 @@ end
 task :minify do
     if tmp = Helper.minify('dist/miniLOL-framework.js')
         if tmp != 1
-            Helper.miniHeader('dist/miniLOL-framework.min.js')
+            Helper.miniHeader('dist/miniLOL-framework.min.js',
+                '/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com] */'
+            )
         end
     else
         exit
     end
 
-    Helper.minify('sources/prototype.js', 'dist/prototype.min.js') || exit
+    if tmp = Helper.minify('sources/prototype.js', 'dist/prototype.min.js')
+        if tmp != 1
+            Helper.miniHeader('dist/prototype.min.js',
+                '/* Prototype JavaScript framework. (c) 2005-2010 Sam Stephenson. MIT-style license. */'
+            )
+        end
+    else
+        exit
+    end
 
     updated       = false
     scriptaculous = ['effects', 'builder', 'sound', 'slider', 'controls', 'dragdrop']
@@ -122,5 +132,9 @@ task :minify do
         minified.close
 
         Helper.minify(minified.path, 'dist/scriptaculous.min.js') || exit
+
+        Helper.miniHeader('dist/scriptaculous.min.js',
+            '/* scriptaculous.js. (c) 2005-2009 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us) */'
+        )
     end
 end
