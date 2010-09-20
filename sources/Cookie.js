@@ -20,7 +20,7 @@
 miniLOL.Cookie = {
     get: function (key, options) {
         var options = miniLOL.Cookie.options(options);
-        var matches = window.document.cookie.match(RegExp.escape(encodeURIComponent(key)) + '=([^;]*)', 'g');
+        var matches = window.document.cookie.match(RegExp.escape(key.encodeURIComponent()) + '=([^;]*)', 'g');
 
         if (!matches) {
             return;
@@ -29,7 +29,7 @@ miniLOL.Cookie = {
         var result = [];
 
         $A(matches).each(function (cookie) {
-            cookie = decodeURIComponent(cookie.match(/^.*?=(.*)$/)[1]);
+            cookie = cookie.match(/^.*?=(.*)$/)[1].decodeURIComponent();
 
             result.push((options.raw) ? cookie : miniLOL.JSON.unserialize(cookie) || cookie);
         });
@@ -79,8 +79,8 @@ miniLOL.Cookie = {
 
     encode: function (key, value, options) {
         return "#{key}=#{value}; #{maxAge}#{expires}#{path}#{domain}#{secure}".interpolate({
-            key:  encodeURIComponent(key),
-            value: encodeURIComponent(value),
+            key:   key.encodeURIComponent(),
+            value: value.encodeURIComponent(),
 
             maxAge:  (!Object.isUndefined(options.maxAge))  ? 'max-age=#{0}; '.interpolate([options.maxAge]) : '',
             expires: (!Object.isUndefined(options.expires)) ? 'expires=#{0}; '.interpolate([options.expires.toUTCString()]) : '',

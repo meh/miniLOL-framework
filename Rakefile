@@ -73,8 +73,11 @@ task :framework do
     if !File.exists?('dist/miniLOL-framework.js')
         updated = true
     else
-        ['preparation', 'extensions', 'History', 'Resource', 'JSON', 'Cookie', 'Storage'].each {|file|
-            if File.mtime("sources/#{file}.js") >= File.mtime('dist/miniLOL-framework.js')
+        files = FileList['sources/**.js']
+        files.exclude('sources/scriptaculous/**', 'sources/prototype.js')
+        
+        files.each {|file|
+            if File.mtime("#{file}") >= File.mtime('dist/miniLOL-framework.js')
                 updated = true
                 break
             end

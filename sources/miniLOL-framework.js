@@ -25,6 +25,8 @@ if (!Object.isObject(window.miniLOL)) {
     };
 }
 
+//= require "utils"
+
 //= require "History"
 //= require "Resource"
 //= require "JSON"
