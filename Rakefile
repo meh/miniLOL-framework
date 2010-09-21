@@ -140,4 +140,21 @@ task :minify do
             '/* scriptaculous.js. (c) 2005-2009 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us) */'
         )
     end
+
+    if !File.exists?('build/miniLOL-framework.full.js')
+        updated = true
+    else
+        ['prototype', 'miniLOL-framework'].each {|file|
+            if File.mtime("build/#{file}.min.js") >= File.mtime('build/miniLOL-framework.full.js')
+                updated = true
+                break
+            end
+        }
+    end
+
+    if updated
+        minified = File.new('build/miniLOL-framework.full.js', 'w')
+        minified.write(File.read('build/prototype.min.js') + File.read('build/miniLOL-framework.min.js'))
+        minified.close
+    end
 end

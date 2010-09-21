@@ -6,3 +6,7 @@ of miniLOL, so here it is, some miniLOL stuff usable out of context.
 
 It's obviously based on link:http://prototypejs.org[Prototype] and extends it with some useful stuff
 (useful to meh :).
+
+Use _miniLOL-framework.full.js_ to get the package with Prototype and miniLOL-framework both minified.
+
+Use _miniLOL-framework.js_ if you want to use another Prototype source.
