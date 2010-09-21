@@ -6,12 +6,12 @@ require 'sprockets'
 # I suggest using 20100616 version, because later versions break prototype.js on IE6
 COMPILER = 'closure-compiler' # --compilation_level ADVANCED_OPTIMIZATIONS'
 
-CLEAN.include('dist/**')
+CLEAN.include('build/**')
 
 module Helper
     ROOT_DIR = File.expand_path(File.dirname(__FILE__))
     SRC_DIR  = File.join(ROOT_DIR, 'src')
-    DIST_DIR = File.join(ROOT_DIR, 'dist')
+    BUILD_DIR = File.join(ROOT_DIR, 'build')
     DOC_DIR  = File.join(ROOT_DIR, 'doc')
     VERSION  = '0.1'
 
@@ -49,7 +49,7 @@ module Helper
 
     def self.sprocketize(options = {})
         options = {
-          :destination    => File.join(DIST_DIR, options[:source]),
+          :destination    => File.join(BUILD_DIR, options[:source]),
           :strip_comments => false
         }.merge(options)
         
@@ -71,14 +71,13 @@ task :default => [:framework, :minify]
 task :framework do
     updated = false
 
-    if !File.exists?('dist/miniLOL-framework.js')
+    if !File.exists?('build/miniLOL-framework.js')
         updated = true
     else
         files = FileList['sources/**.js']
-        files.exclude('sources/scriptaculous/**', 'sources/prototype.js')
         
         files.each {|file|
-            if File.mtime("#{file}") >= File.mtime('dist/miniLOL-framework.js')
+            if File.mtime("#{file}") >= File.mtime('build/miniLOL-framework.js')
                 updated = true
                 break
             end
@@ -94,9 +93,9 @@ task :framework do
 end
 
 task :minify do
-    if tmp = Helper.minify('dist/miniLOL-framework.js')
+    if tmp = Helper.minify('build/miniLOL-framework.js')
         if tmp != 1
-            Helper.miniHeader('dist/miniLOL-framework.min.js',
+            Helper.miniHeader('build/miniLOL-framework.min.js',
                 '/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com] */'
             )
         end
@@ -104,9 +103,9 @@ task :minify do
         exit
     end
 
-    if tmp = Helper.minify('sources/prototype.js', 'dist/prototype.min.js')
+    if tmp = Helper.minify('dependencies/prototype.js', 'build/prototype.min.js')
         if tmp != 1
-            Helper.miniHeader('dist/prototype.min.js',
+            Helper.miniHeader('build/prototype.min.js',
                 '/* Prototype JavaScript framework. (c) 2005-2010 Sam Stephenson. MIT-style license. */'
             )
         end
@@ -117,11 +116,11 @@ task :minify do
     updated       = false
     scriptaculous = ['effects', 'builder', 'sound', 'slider', 'controls', 'dragdrop']
 
-    if !File.exists?('dist/scriptaculous.min.js')
+    if !File.exists?('build/scriptaculous.min.js')
         updated = true
     else
         scriptaculous.each {|file|
-            if File.mtime("sources/scriptaculous/#{file}.js") >= File.mtime('dist/scriptaculous.min.js')
+            if File.mtime("dependencies/scriptaculous/#{file}.js") >= File.mtime('build/scriptaculous.min.js')
                 updated = true
                 break
             end
@@ -131,13 +130,13 @@ task :minify do
     if updated
         minified = File.new(`mktemp -u`.strip, 'w')
         scriptaculous.each {|file|
-            minified.write(File.read("sources/scriptaculous/#{file}.js"))
+            minified.write(File.read("dependencies/scriptaculous/#{file}.js"))
         }
         minified.close
 
-        Helper.minify(minified.path, 'dist/scriptaculous.min.js') || exit
+        Helper.minify(minified.path, 'build/scriptaculous.min.js') || exit
 
-        Helper.miniHeader('dist/scriptaculous.min.js',
+        Helper.miniHeader('build/scriptaculous.min.js',
             '/* scriptaculous.js. (c) 2005-2009 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us) */'
         )
     end

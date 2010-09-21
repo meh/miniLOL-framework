@@ -28,8 +28,10 @@ Element.addMethods({
     },
 
     xpath: function (element, query) {
-        element = (Object.isElement(element) || Object.isDocument(element)) ? element : this;
-        query   = (Object.isElement(element) || Object.isDocument(element)) ? query : element;
+        if (Object.isUndefined(query)) {
+            query   = element;
+            element = this;
+        }
 
         var result = [];
         var tmp;
@@ -53,8 +55,10 @@ Element.addMethods({
     },
 
     select: function (element, query) {
-        element = (Object.isElement(element) || Object.isDocument(element)) ? element : this;
-        query   = (Object.isElement(element) || Object.isDocument(element)) ? query : element;
+        if (Object.isUndefined(query)) {
+            query   = element;
+            element = this;
+        }
 
         return Prototype.Selector.select(query, element);
     },
@@ -139,7 +143,7 @@ Element.addMethods({
                         return;
                     }
 
-                    if (text.nodeValue.isEmpty()) {
+                    if (text.nodeValue.blank()) {
                         return;
                     }
 
