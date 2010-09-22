@@ -33,6 +33,8 @@ module Helper
 
                 return false
             end
+        else
+            return 1
         end
     
         return true
