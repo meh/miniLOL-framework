@@ -17,17 +17,15 @@
  * along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.         *
  ****************************************************************************/
 
-if (!Object.isObject(window.Document)) {
-    window.Document = {};
-}
+miniLOL.Document = (function () {
+    var fix;
 
-Object.extend(Document, {
-    fix: function (obj) {
-        if (!obj) {
-            return;
-        }
-
-        if (Prototype.Browser.IE) {
+    if (Prototype.Browser.IE) {
+        fix = function (obj) {
+            if (!obj) {
+                return;
+            }
+    
             obj = { real: obj };
 
             obj.documentElement = obj.real.documentElement;
@@ -36,25 +34,48 @@ Object.extend(Document, {
                 return this.real.getElementsByTagName(name);
             };
 
-            obj.getElementById = function (id) {
-                return miniLOL.utils.XML.getElementById.call(this.real, id);
-            };
+            obj.getElementById = (function (id) {
+                return Element.xpath(this, "//*[@id='#{0}']".interpolate([id])).first();
+            }).bind(obj.real);
 
             obj.real.setProperty('SelectionLanguage', 'XPath');
+
+            obj.xpath  = Element.xpath.bind(obj.real);
+            obj.select = Element.select.bind(obj.real);
+    
+            return obj;
         }
-        else if (!Prototype.Browser.Good) {
+    }
+    else if (!Prototype.Browser.Good) {
+        fix = function (obj) {
+            if (!obj) {
+                return;
+            }
+    
             obj.getElementById = function (id) {
                 return this.xpath("//*[@id='#{0}']".interpolate([id])).first();
             };
+
+            obj.xpath  = Element.xpath;
+            obj.select = Element.select;
+    
+            return obj;
         }
+    }
+    else {
+        fix = function (obj) {
+            if (!obj) {
+                return;
+            }
+    
+            obj.xpath  = Element.xpath;
+            obj.select = Element.select;
+    
+            return obj;
+        }
+    }
 
-        obj.xpath  = Element.xpath;
-        obj.select = Element.select;
-
-        return obj;
-    },
-
-    check: function (xml, path) {
+    function check (xml, path) {
         var error = false;
 
         if (!xml) {
@@ -76,4 +97,9 @@ Object.extend(Document, {
 
         return error;
     }
-});
+
+    return {
+        fix:   fix,
+        check: check
+    };
+})();

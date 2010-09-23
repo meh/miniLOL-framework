@@ -17,8 +17,8 @@
  * along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.         *
  ****************************************************************************/
 
-Object.extend(Function, {
-    parse: function (string) {
+Object.extend(Function, (function () {
+    function parse (string) {
         matches = string.match(/^function\s*\((.*?)\)[\s\n]*\{([\s\S]*)\}[\s\n]*/m);
 
         if (!matches) {
@@ -30,10 +30,18 @@ Object.extend(Function, {
 
         return new Function(signature, body);
     }
-});
 
-Object.extend(Function.prototype, {
-    clone: function () {
+    return {
+        parse: parse
+    };
+})());
+
+Object.extend(Function.prototype, (function () {
+    function clone () {
         return Function.parse(this.toString());
     }
-});
+
+    return {
+        clone: clone
+    };
+})());

@@ -32,3 +32,6 @@ if (!Object.isObject(window.miniLOL)) {
 //= require "JSON"
 //= require "Cookie"
 //= require "Storage"
+
+//= require "Document"
+//= require "CSS"

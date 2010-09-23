@@ -79,6 +79,11 @@ miniLOL.History = {
         },
 
         InternetExplorer: function () {
+            if (miniLOL.History.current == window.location.hash) {
+                return;
+            }
+
+            Event.fire(window, 'hashchange', window.location.hash.replace(/^#/, ''));
         }
     }
 }

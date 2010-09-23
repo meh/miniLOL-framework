@@ -76,7 +76,7 @@ task :framework do
     if !File.exists?('build/miniLOL-framework.js')
         updated = true
     else
-        files = FileList['sources/**.js']
+        files = FileList['sources/**/*.js']
         
         files.each {|file|
             if File.mtime("#{file}") >= File.mtime('build/miniLOL-framework.js')

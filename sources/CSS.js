@@ -17,7 +17,41 @@
  * along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.         *
  ****************************************************************************/
 
-//= require "extensions/function"
-//= require "extensions/object"
-//= require "extensions/string"
-//= require "extensions/element"
+miniLOL.CSS = (function () {
+    function include (path) {
+        var style = false;
+
+        if (!$$('link').find(function (css) { return css.getAttribute('href') == path }) && miniLOL.utils.exists(path)) {
+            style = new Element('link', {
+                rel: 'stylesheet',
+                href: path,
+                type: 'text/css'
+            });
+
+            $$('head')[0].insert(style);
+
+            Event.fire(document, ':css.included', style);
+        }
+
+        return style;
+    }
+
+    function create (style, id) {
+        var css = new Element('style', { type: 'text/css' }).update(style);
+
+        if (id) {
+            css.setAttribute('id', id);
+        }
+
+        $$('head').first().appendChild(css);
+
+        Event.fire(document, ':css.created', css);
+
+        return css;
+    }
+
+    return {
+        include: include,
+        create:  create
+    };
+})();

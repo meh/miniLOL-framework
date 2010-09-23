@@ -17,8 +17,8 @@
  * along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.         *
  ****************************************************************************/
 
-Object.extend(String, {
-    fromAttributes: function (attributes) {
+Object.extend(String, (function () {
+    function fromAttributes (attributes) {
         var result = '';
 
         for (var i = 0; i < attributes.length; i++) {
@@ -29,19 +29,24 @@ Object.extend(String, {
         }
 
         return result;
-    },
+    }
     
-    fromXML: function (node) {
+    function fromXML (node) {
         if (!Object.isXML(node)) {
             return false;
         }
 
         return new XMLSerializer().serializeToString(node);
     }
-});
 
-Object.extend(String.prototype, {
-    toQueryParams: function () {
+    return {
+        fromAttributes: fromAttributes,
+        fromXML:        fromXML
+    };
+})());
+
+Object.extend(String.prototype, (function () {
+    function toQueryParams () {
         var result  = {};
         var matches = this.match(/[?#](.*)$/);
 
@@ -63,13 +68,13 @@ Object.extend(String.prototype, {
         }
 
         return result;
-    },
+    }
 
-    toXML: function () {
+    function toXML () {
         return new DOMParser().parseFromString(this, 'text/xml');
-    },
+    }
 
-    isURL: function () {
+    function isURL () {
         var match = this.match(/^mailto:([\w.%+-]+@[\w.]+\.[A-Za-z]{2,4})$/);
         if (match) {
             return {
@@ -88,31 +93,51 @@ Object.extend(String.prototype, {
             protocol: match[1],
             uri:      match[2]
         };
-    },
+    }
 
-    blank: function () {
+    function blank () {
         return this == 0;
-    },
+    }
 
-    getHashFragment: function () {
+    function getHashFragment () {
         var matches = this.match(/(#.*)$/);
 
         return (matches) ? matches[1] : '';
-    },
-
-    encodeURI: function () {
-        return encodeURI(this);
-    },
-
-    decodeURI: function () {
-        return decodeURI(this);
-    },
-
-    encodeURIComponent: function () {
-        return encodeURIComponent(this);
-    },
-
-    decodeURIComponent: function () {
-        return decodeURIComponent(this);
     }
-});
+
+    var _encodeURI          = window.encodeURI;
+    var _decodeURI          = window.decodeURI;
+    var _encodeURIComponent = window.encodeURIComponent;
+    var _decodeURIComponent = window.decodeURIComponent;
+
+    function encodeURI () {
+        return _encodeURI(this);
+    }
+
+    function decodeURI () {
+        return _decodeURI(this);
+    }
+
+    function encodeURIComponent () {
+        return _encodeURIComponent(this);
+    }
+
+    function decodeURIComponent () {
+        return _decodeURIComponent(this);
+    }
+
+    return {
+        toQueryParams: toQueryParams,
+        toXML:         toXML,
+
+        isURL: isURL,
+        blank: blank,
+
+        getHashFragment: getHashFragment,
+
+        encodeURI:          encodeURI,
+        decodeURI:          decodeURI,
+        encodeURIComponent: encodeURIComponent,
+        decodeURIComponent: decodeURIComponent
+    };
+})());

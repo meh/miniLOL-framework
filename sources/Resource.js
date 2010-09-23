@@ -17,7 +17,7 @@
  * along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.         *
  ****************************************************************************/
 
-miniLOL.Resource = Class.create({
+Resource = Class.create({
     initialize: function (name, wrapper) {
         if (!wrapper) {
             throw new Error('No wrapper has been passed.');

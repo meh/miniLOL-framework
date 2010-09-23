@@ -33,49 +33,6 @@ miniLOL.utils = {
         return result;
     },
 
-    includeCSS: function (path) {
-        var style;
-
-        if (style = miniLOL.theme.style.list[path]) {
-            return style;
-        }
-        else if (style = $$('link').find(function (css) { return css.getAttribute('href') == path })) {
-            miniLOL.theme.style.list[path] = style;
-
-            return style;
-        }
-        else if (style = miniLOL.utils.exists(path)) {
-            style = new Element('link', {
-                rel: 'stylesheet',
-                href: path,
-                type: 'text/css'
-            });
-
-            $$('head')[0].insert(style);
-
-            Event.fire(document, ':css.included', style);
-
-            return style;
-        }
-        else {
-            return false;
-        }
-    },
-
-    css: function (style, id) {
-        var css = new Element('style', { type: 'text/css' }).update(style);
-
-        if (id) {
-            css.setAttribute('id', id);
-        }
-
-        $$('head').first().appendChild(css);
-
-        Event.fire(document, ':css.created', css);
-
-        return css;
-    },
-
     execute: function (path) {
         var result;
         var error;

@@ -17,20 +17,20 @@
  * along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.         *
  ****************************************************************************/
 
-Object.extend(Object, {
-    isBoolean: function (val) {
+Object.extend(Object, (function () {
+    function isBoolean (val) {
         return typeof val == 'boolean' || val.constructor === Boolean;
-    },
+    }
 
-    isObject: function (val) {
+    function isObject (val) {
         return typeof val == 'object';
-    },
+    }
 
-    isDocument: function (val) {
+    function isDocument (val) {
         return val.toString().include('Document');
-    },
+    }
 
-    isXML: function (val) {
+    function isXML (val) {
         if (typeof val !== 'object') {
             return false;
         }
@@ -42,9 +42,9 @@ Object.extend(Object, {
         }
 
         return val.documentElement.nodeName != "HTML";
-    },
+    }
 
-    fromAttributes: function (attributes) {
+    function fromAttributes (attributes) {
         var result = {};
 
         for (var i = 0; i < attributes.length; i++) {
@@ -52,9 +52,9 @@ Object.extend(Object, {
         }
 
         return result;
-    },
+    }
 
-    toQueryString: function (query) {
+    function toQueryString (query) {
         var result = '';
 
         for (var name in query) {
@@ -66,35 +66,59 @@ Object.extend(Object, {
 
         return result.substr(0, result.length - 1);
     }
-});
 
-if (!Object.isFunction(Object.defineProperty)) {
-    // Descriptor has 5 possible variables: value, get, set, writable, configurable, enumerable
-    Object.defineProperty = function (object, property, descriptor) {
-        if (Object.isFunction(descriptor.get) && Object.isFunction(object.__defineGetter__)) {
-            object.__defineGetter__(property, descriptor.get);
+    if (!Object.isFunction(Object.defineProperty)) {
+        // Descriptor has 5 possible variables: value, get, set, writable, configurable, enumerable
+        function defineProperty (object, property, descriptor) {
+            if (Object.isFunction(descriptor.get) && Object.isFunction(object.__defineGetter__)) {
+                object.__defineGetter__(property, descriptor.get);
+            }
+    
+            if (Object.isFunction(descriptor.set) && Object.isFunction(object.__defineSetter__)) {
+                object.__defineSetter__(property, descriptor.set);
+            }
         }
+    }
+    else {
+        var defineProperty = Object.defineProperty;
+    }
+    
+    if (!Object.isFunction(Object.defineProperties)) {
+        Object.defineProperties = function (object, properties) {
+            for (var property in properties) {
+                Object.defineProperty(object, property, properties[property]);
+            }
+        };
+    }
+    else {
+        var defineProperties = Object.defineProperties;
+    }
+    
+    if (!Object.isFunction(Object.create)) {
+        Object.create = function (proto, properties) {
+            var obj = new Object(proto);
+    
+            Object.defineProperties(obj, properties);
+    
+            return obj;
+        };
+    }
+    else {
+        var create = Object.create;
+    }
 
-        if (Object.isFunction(descriptor.set) && Object.isFunction(object.__defineSetter__)) {
-            object.__defineSetter__(property, descriptor.set);
-        }
+    return {
+        isBoolean:  isBoolean,
+        isObject:   isObject,
+        isDocument: isDocument,
+        isXML:      isXML,
+
+        fromAttributes: fromAttributes,
+        toQueryString:  toQueryString,
+
+        defineProperty:   defineProperty,
+        defineProperties: defineProperties,
+        create:           create
     };
-}
+})());
 
-if (!Object.isFunction(Object.defineProperties)) {
-    Object.defineProperties = function (object, properties) {
-        for (var property in properties) {
-            Object.defineProperty(object, property, properties[property]);
-        }
-    };
-}
-
-if (!Object.isFunction(Object.create)) {
-    Object.create = function (proto, properties) {
-        var obj = new Object(proto);
-
-        Object.defineProperties(obj, properties);
-
-        return obj;
-    };
-}

@@ -17,53 +17,65 @@
  * along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.         *
  ****************************************************************************/
 
-Element.addMethods({
-    load: function (path, options) {
+window.Element.addMethods((function () {
+    function load (path, options) {
         if (options && !Object.isUndefined(options.frequency)) {
             new Ajax.PeriodicalUpdater(this, path, options);
         }
         else {
             new Ajax.Updater(this, path, options);
         }
-    },
+    }
 
-    xpath: function (element, query) {
-        if (Object.isUndefined(query)) {
-            query   = element;
-            element = this;
-        }
-
-        var result = [];
-        var tmp;
-
-        if (Prototype.Browser.IE) {
+    if (Prototype.Browser.IE) {
+        function xpath (element, query) {
+            if (Object.isUndefined(query)) {
+                query   = element;
+                element = this;
+            }
+    
+            var result = [];
+            var tmp;
+    
             tmp = element.real.selectNodes(query);
-
+    
             for (var i = 0; i < tmp.length; i++) {
                 result.push(tmp.item(i));
             }
+    
+            return result;
         }
-        else {
+    }
+    else {
+        function xpath (element, query) {
+            if (Object.isUndefined(query)) {
+                query   = element;
+                element = this;
+            }
+    
+            var result = [];
+            var tmp;
+    
             tmp = (element.ownerDocument || element).evaluate(query, element, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-
+    
             for (var i = 0; i < tmp.snapshotLength; i++) {
                 result.push(tmp.snapshotItem(i));
             }
+    
+            return result;
         }
+    }
 
-        return result;
-    },
-
-    select: function (element, query) {
+    function select (element, query) {
         if (Object.isUndefined(query)) {
             query   = element;
             element = this;
         }
 
         return Prototype.Selector.select(query, element);
-    },
+    }
 
-    getTextDescendants: function (element) {
+    function getTextDescendants (element) {
         element = element || this;
 
         var result = [];
@@ -87,9 +99,9 @@ Element.addMethods({
         accumulateTextChildren(element);
 
         return result;
-    },
+    }
 
-    getFirstText: function (elements) {
+    function getFirstText (elements) {
         elements = elements || this;
 
         var result = '';
@@ -119,9 +131,9 @@ Element.addMethods({
         });
 
         return result;
-    },
+    }
 
-    toObject: function (element) {
+    function toObject (element) {
         element = element || this;
 
         var result = {};
@@ -159,4 +171,13 @@ Element.addMethods({
 
         return result;
     }
-});
+
+    return {
+        load:               load,
+        xpath:              xpath,
+        select:             select,
+        getTextDescendants: getTextDescendants,
+        getFirstText:       getFirstText,
+        toObject:           toObject
+    };
+})());
