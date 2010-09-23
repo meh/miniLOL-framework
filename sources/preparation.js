@@ -18,6 +18,11 @@
  ****************************************************************************/
 
 /* Cross-Browser faggotree */
+(function () {
+
+if (Prototype.Browser.Gecko) {
+    Prototype.Browser.Mozilla = true;
+}
 
 if (navigator.userAgent.match(/Chrome/)) {
     Prototype.Browser.Chrome = true;
@@ -27,11 +32,30 @@ if (navigator.userAgent.match(/Safari/) && !Prototype.Browser.Chrome) {
     Prototype.Browser.Safari = true;
 }
 
-if (Prototype.Browser.Gecko || Prototype.Browser.Opera) {
+if (Prototype.Browser.Mozilla || Prototype.Browser.Opera) {
     Prototype.Browser.Good = true;
 }
 else {
     Prototype.Browser.Bad = true;
+}
+
+Prototype.Browser.Name = window.navigator.appName;
+
+var version = window.navigator.appVersion;
+
+try {
+    if (Prototype.Browser.IE) {
+        Prototype.Browser.Version = parseFloat(version.match(/MSIE ([^;]*)/)[1]);
+    }
+    else if (Prototype.Browser.Mozilla) {
+        Prototype.Browser.Version = parseFloat(version);
+    }
+    else {
+        throw null;
+    }
+}
+catch (e) {
+    Prototype.Browser.Version = 0;
 }
 
 if (Prototype.Browser.IE) {
@@ -113,5 +137,7 @@ if (Prototype.Browser.IE) {
         });
     }
 }
+
+})();
 
 //= require "extensions"

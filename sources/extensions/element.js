@@ -27,17 +27,17 @@ window.Element.addMethods((function () {
         }
     }
 
+    var xpath;
+
     if (Prototype.Browser.IE) {
-        function xpath (element, query) {
+        xpath = function (element, query) {
             if (Object.isUndefined(query)) {
                 query   = element;
                 element = this;
             }
     
             var result = [];
-            var tmp;
-    
-            tmp = element.real.selectNodes(query);
+            var tmp    = element.selectNodes(query);
     
             for (var i = 0; i < tmp.length; i++) {
                 result.push(tmp.item(i));
@@ -47,16 +47,14 @@ window.Element.addMethods((function () {
         }
     }
     else {
-        function xpath (element, query) {
+        xpath = function (element, query) {
             if (Object.isUndefined(query)) {
                 query   = element;
                 element = this;
             }
     
             var result = [];
-            var tmp;
-    
-            tmp = (element.ownerDocument || element).evaluate(query, element, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+            var tmp    = (element.ownerDocument || element).evaluate(query, element, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
     
             for (var i = 0; i < tmp.snapshotLength; i++) {
                 result.push(tmp.snapshotItem(i));
