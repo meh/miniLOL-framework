@@ -21,7 +21,7 @@ miniLOL.CSS = (function () {
     function include (path) {
         var style = false;
 
-        if (!$$('link').find(function (css) { return css.getAttribute('href') == path }) && miniLOL.utils.exists(path)) {
+        if (!(style = $$('link').find(function (css) { return css.getAttribute('href') == path })) && miniLOL.utils.exists(path)) {
             style = new Element('link', {
                 rel: 'stylesheet',
                 href: path,

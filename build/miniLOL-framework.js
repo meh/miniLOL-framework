@@ -741,7 +741,7 @@ miniLOL.History = {
 
 miniLOL.History.initialize();
 
-Resource = Class.create({
+miniLOL.Resource = Class.create({
     initialize: function (name, wrapper) {
         if (!wrapper) {
             throw new Error('No wrapper has been passed.');
@@ -1361,7 +1361,7 @@ miniLOL.CSS = (function () {
     function include (path) {
         var style = false;
 
-        if (!$$('link').find(function (css) { return css.getAttribute('href') == path }) && miniLOL.utils.exists(path)) {
+        if (!(style = $$('link').find(function (css) { return css.getAttribute('href') == path })) && miniLOL.utils.exists(path)) {
             style = new Element('link', {
                 rel: 'stylesheet',
                 href: path,
