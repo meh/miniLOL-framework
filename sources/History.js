@@ -77,30 +77,36 @@ miniLOL.History = {
         InternetExplorer: function () {
             document.observe('dom:loaded', function () {
                 miniLOL.History.IE = {
+                    check: function () {
+                        if (!$('__miniLOL.History')) {
+                            $(document.body).insert({ top: miniLOL.History.IE.element });
+                        }
+                    },
+
                     put: function (hash) {
-                        var doc = miniLOL.History.IE.element.document;
+                        miniLOL.History.IE.check();
+
+                        var doc = miniLOL.History.IE.element.contentWindow.document;
 
                         doc.open();
                         doc.close();
 
-                        doc.location.hash = encodeURIComponent(hash.substring(1));
+                        doc.location.hash = encodeURIComponent(hash);
                     },
     
                     get: function () {
-                        var doc = miniLOL.History.IE.element.document;
+                        miniLOL.History.IE.check();
 
-                        return doc.location.hash.substring(1);
+                        return miniLOL.History.IE.element.contentWindow.document.location.hash;
                     },
     
-                    element: new Element('iframe', { name: '__miniLOL.History', style: 'display: none;', src: 'javascript:false' })
+                    element: new Element('iframe', { id: '__miniLOL.History', style: 'display: none !important; z-index: -9001 !important;', src: 'javascript:false;' })
                 };
- 
-                $(document.body).insert({ top: miniLOL.History.IE.element });
 
                 var first = miniLOL.History.current;
-                
+ 
+                $(document.body).insert({ top: miniLOL.History.IE.element });                
                 miniLOL.History.IE.put(first);
-
                 miniLOL.History.reset(miniLOL.History.interval, miniLOL.History.Checkers.InternetExplorer);
             });
         }
@@ -129,7 +135,7 @@ miniLOL.History = {
 
             if (hashes.actual != hashes.iframe) {
                 if (hashes.actual != hashes.current) { // The user is moving in the History
-                    url = miniLOL.History.current = hashes.iframe
+                    window.location.hash = url = miniLOL.History.current = hashes.iframe
                 }
                 else { // The user went to the actual URL
                     url = miniLOL.History.current = hashes.actual
