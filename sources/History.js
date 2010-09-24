@@ -18,10 +18,14 @@
  ****************************************************************************/
 
 miniLOL.History = {
-    interval: 0.2,
+    interval: 0.15,
 
     initialize: function () {
         miniLOL.History.current = window.location.hash;
+
+        if (Prototype.Browser.Opera && history.navigationMode) {
+            history.navigationMode = 'compatible';
+        }
 
         Event.observe(document, ':url.change', function (event) {
             miniLOL.History.current = event.memo;
@@ -44,8 +48,11 @@ miniLOL.History = {
 
     Initializers: {
         get: function () {
-            if ('onhashchange' in window && !(Prototype.Browser.IE && Prototype.Browser.Version == 7)) {
+            if ('onhashchange' in window && !(Prototype.Browser.InternetExplorer && Prototype.Browser.Version == 7)) {
                 return miniLOL.History.Initializers.Default;
+            }
+            else if (Prototype.Browser.InternetExplorer) {
+                return miniLOL.History.Initializers.InternetExplorer;
             }
             else {
                 return miniLOL.History.Initializers.Unsupported;
@@ -63,21 +70,43 @@ miniLOL.History = {
 
         Unsupported: function () {
             document.observe('dom:loaded', function () {
-                miniLOL.History.reset(miniLOL.History.interval, miniLOL.History.Checkers.get());
+                miniLOL.History.reset(miniLOL.History.interval, miniLOL.History.Checkers.Default);
+            });
+        },
+
+        InternetExplorer: function () {
+            document.observe('dom:loaded', function () {
+                miniLOL.History.IE = {
+                    put: function (hash) {
+                        var doc = miniLOL.History.IE.element.document;
+
+                        doc.open();
+                        doc.close();
+
+                        doc.location.hash = encodeURIComponent(hash.substring(1));
+                    },
+    
+                    get: function () {
+                        var doc = miniLOL.History.IE.element.document;
+
+                        return doc.location.hash.substring(1);
+                    },
+    
+                    element: new Element('iframe', { name: '__miniLOL.History', style: 'display: none;', src: 'javascript:false' })
+                };
+ 
+                $(document.body).insert({ top: miniLOL.History.IE.element });
+
+                var first = miniLOL.History.current;
+                
+                miniLOL.History.IE.put(first);
+
+                miniLOL.History.reset(miniLOL.History.interval, miniLOL.History.Checkers.InternetExplorer);
             });
         }
     },
 
     Checkers: {
-        get: function () {
-            if (Prototype.Browser.IE) {
-                return miniLOL.History.Checkers.InternetExplorer;
-            }
-            else {
-                return miniLOL.History.Checkers.Default;
-            }
-        },
-
         Default: function () {
             if (miniLOL.History.current == window.location.hash) {
                 return;
@@ -90,11 +119,26 @@ miniLOL.History = {
         },
 
         InternetExplorer: function () {
-            if (miniLOL.History.current == window.location.hash) {
-                return;
-            }
+            var hashes = {
+                iframe: miniLOL.History.IE.get(),
+                actual: window.location.hash,
+                current: miniLOL.History.current
+            };
 
-            Event.fire(document, ':url.change', decodeURIComponent(window.location.hash.replace(/^#/, '')));
+            var url;
+
+            if (hashes.actual != hashes.iframe) {
+                if (hashes.actual != hashes.current) { // The user is moving in the History
+                    url = miniLOL.History.current = hashes.iframe
+                }
+                else { // The user went to the actual URL
+                    url = miniLOL.History.current = hashes.actual
+
+                    miniLOL.History.IE.put(url);
+                }
+
+                Event.fire(document, ':url.change', url);
+            }
         }
     }
 }

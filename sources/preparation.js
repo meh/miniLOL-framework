@@ -20,6 +20,10 @@
 /* Cross-Browser faggotree */
 (function () {
 
+if (Prototype.Browser.IE) {
+    Prototype.Browser.InternetExplorer = true;
+}
+
 if (Prototype.Browser.Gecko) {
     Prototype.Browser.Mozilla = true;
 }
@@ -47,7 +51,7 @@ try {
     if (Prototype.Browser.IE) {
         Prototype.Browser.Version = parseFloat(version.match(/MSIE ([^;]*)/)[1]);
     }
-    else if (Prototype.Browser.Mozilla) {
+    else if (Prototype.Browser.Mozilla || Prototype.Browser.Opera) {
         Prototype.Browser.Version = parseFloat(version);
     }
     else {
