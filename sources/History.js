@@ -62,8 +62,8 @@ miniLOL.History = {
         Default: function () {
             Event.observe(window, 'hashchange', function (event) {
                  Event.fire(document, ':url.change', (Prototype.Browser.Mozilla)
-                    ? window.location.hash.replace(/^#/, '')
-                    : decodeURIComponent(window.location.hash.replace(/^#/, ''))
+                    ? window.location.hash.substring(1)
+                    : decodeURIComponent(window.location.hash.substring(1))
                 );
             });
         },
@@ -78,7 +78,7 @@ miniLOL.History = {
             document.observe('dom:loaded', function () {
                 miniLOL.History.IE = {
                     check: function () {
-                        if (!$('__miniLOL.History')) {
+                        if (!miniLOL.History.IE.element.parentNode || miniLOL.History.IE.element.parentNode.nodeName == '#document-fragment') {
                             $(document.body).insert({ top: miniLOL.History.IE.element });
                         }
                     },
@@ -91,7 +91,7 @@ miniLOL.History = {
                         doc.open();
                         doc.close();
 
-                        doc.location.hash = encodeURIComponent(hash);
+                        doc.location.hash = encodeURIComponent(hash.substring(1));
                     },
     
                     get: function () {
@@ -119,8 +119,8 @@ miniLOL.History = {
             }
 
             Event.fire(document, ':url.change', (Prototype.Browser.Mozilla)
-                ? window.location.hash.replace(/^#/, '')
-                : decodeURIComponent(window.location.hash.replace(/^#/, ''))
+                ? window.location.hash.substring(1)
+                : decodeURIComponent(window.location.hash.substring(1))
             );
         },
 
@@ -131,19 +131,15 @@ miniLOL.History = {
                 current: miniLOL.History.current
             };
 
-            var url;
-
             if (hashes.actual != hashes.iframe) {
-                if (hashes.actual != hashes.current) { // The user is moving in the History
-                    window.location.hash = url = miniLOL.History.current = hashes.iframe
+                if (hashes.actual && hashes.actual == hashes.current) { // The user is moving in the History
+                    window.location.hash = miniLOL.History.current = hashes.iframe;
                 }
                 else { // The user went to the actual URL
-                    url = miniLOL.History.current = hashes.actual
-
-                    miniLOL.History.IE.put(url);
+                    miniLOL.History.IE.put(miniLOL.History.current = hashes.actual);
                 }
 
-                Event.fire(document, ':url.change', url);
+                Event.fire(document, ':url.change', miniLOL.History.current);
             }
         }
     }

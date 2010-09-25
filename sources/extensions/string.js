@@ -75,23 +75,34 @@ Object.extend(String.prototype, (function () {
     }
 
     function isURL () {
-        var match = this.match(/^mailto:([\w.%+-]+@[\w.]+\.[A-Za-z]{2,4})$/);
+        return /^(\w+):(\/\/.+?(:\d)?)(\/)?/.test(this) || /^mailto:([\w.%+-]+@[\w.]+\.[A-Za-z]{2,4})$/.test(this);
+    }
+
+    function parseURL () {
+        var match = this.match(/^mailto:(([\w.%+-]+)@([\w.]+\.[A-Za-z]{2,4}))$/);
         if (match) {
             return {
                 protocol: 'mailto',
-                uri:      match[1]
+                uri:      match[1],
+                user:     match[2],
+                host:     match[3]
             };
         }
 
-        match = this.match(/^(\w+):(\/\/.+?(:\d)?)(\/)?/);
+        match = this.match(/^((\w+):\/\/(((.+?)(:(\d+)?))(\/?.*)))$/);
 
         if (!match) {
             return false;
         }
 
         return {
-            protocol: match[1],
-            uri:      match[2]
+            full:     match[1],
+            protocol: match[2],
+            uri:      match[3],
+            host:     match[4],
+            hostname: match[5],
+            port:     match[7],
+            path:     match[8]
         };
     }
 
@@ -130,7 +141,9 @@ Object.extend(String.prototype, (function () {
         toQueryParams: toQueryParams,
         toXML:         toXML,
 
-        isURL: isURL,
+        isURL:    isURL,
+        parseURL: parseURL,
+
         blank: blank,
 
         getHashFragment: getHashFragment,
