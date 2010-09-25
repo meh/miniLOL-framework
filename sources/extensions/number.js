@@ -17,9 +17,50 @@
  * along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.         *
  ****************************************************************************/
 
-//= require "extensions/function"
-//= require "extensions/object"
-//= require "extensions/string"
-//= require "extensions/number"
-//= require "extensions/date"
-//= require "extensions/element"
+Object.extend(Number.prototype, (function () {
+    function milliseconds () {
+        return this * 1000;
+    }
+
+    function seconds () {
+        return this;
+    }
+
+    function minutes () {
+        return this * 60;
+    }
+
+    function hours () {
+        return this * 60 * 60;
+    }
+
+    function days () {
+        return this * 60 * 60 * 24;
+    }
+
+    function weeks () {
+        return this * 60 * 60 * 24 * 7;
+    }
+
+    function years () {
+        return this * 60 * 60 * 24 * 375;
+    }
+
+    return {
+        milliseconds: milliseconds,
+        ms:           milliseconds,
+
+        seconds: seconds,
+        second:  seconds,
+        minutes: minutes,
+        minute:  minutes,
+        hours:   hours,
+        hour:    hours,
+        days:    days,
+        day:     days,
+        weeks:   weeks,
+        week:    weeks,
+        years:   years,
+        year:    years
+    };
+})());

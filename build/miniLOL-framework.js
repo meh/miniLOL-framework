@@ -418,6 +418,47 @@ Object.extend(String.prototype, (function () {
     };
 })());
 
+Object.extend(Number.prototype, (function () {
+    function seconds () {
+        return this;
+    }
+
+    function minutes () {
+        return this * 60;
+    }
+
+    function hours () {
+        return this * 60 * 60;
+    }
+
+    function days () {
+        return this * 60 * 60 * 24;
+    }
+
+    function weeks () {
+        return this * 60 * 60 * 24 * 7;
+    }
+
+    function years () {
+        return this * 60 * 60 * 24 * 375;
+    }
+
+    return {
+        seconds: seconds,
+        second:  seconds,
+        minutes: minutes,
+        minute:  minutes,
+        hours:   hours,
+        hour:    hours,
+        days:    days,
+        day:     days,
+        weeks:   weeks,
+        week:    weeks,
+        years:   years,
+        year:    years
+    };
+})());
+
 window.Element.addMethods((function () {
     function load (path, options) {
         if (options && !Object.isUndefined(options.frequency)) {
@@ -583,7 +624,11 @@ window.Element.addMethods((function () {
 
 if (!Object.isObject(window.miniLOL)) {
     window.miniLOL = {
-        error: Prototype.emptyFunction
+        error: Prototype.emptyFunction,
+
+        Framework: {
+            Version: '0.1'
+        }
     };
 }
 
@@ -1079,9 +1124,50 @@ miniLOL.JSON.unserialize = function (string) {
     }
 };
 
-miniLOL.Cookie = {
-    get: function (key, options) {
-        var options = miniLOL.Cookie.options(options);
+miniLOL.Cookie = (function () {
+    function _options (options) {
+        return Object.extend({
+            expires: new Date(new Date().getTime() + 3600 * 1000),
+            path:    '',
+            domain:  '',
+            secure:  '',
+
+            raw: false
+        }, options || {});
+    }
+
+    function encode (key, value, options) {
+        if (Object.isUndefined(options)) {
+            options = {};
+        }
+
+        return "#{key}=#{value}; #{maxAge}#{expires}#{path}#{domain}#{secure}".interpolate({
+            key:   key.encodeURIComponent(),
+            value: value.encodeURIComponent(),
+
+            maxAge:  (!Object.isUndefined(options.maxAge))  ? 'max-age=#{0}; '.interpolate([options.maxAge]) : '',
+            expires: (!Object.isUndefined(options.expires)) ? 'expires=#{0}; '.interpolate([options.expires.toUTCString()]) : '',
+            path:    (!Object.isUndefined(options.path))    ? 'path=#{0}; '.interpolate([options.path]) : '',
+            domain:  (!Object.isUndefined(options.domain))  ? 'domain=#{0}; '.interpolate([options.domain]) : '',
+
+            secure: (options.secure) ? 'secure' : ''
+        });
+    }
+
+    function keys () {
+        var result = [];
+
+        window.document.cookie.split(/; /).each(function (cookie) {
+            cookie = cookie.split(/=/);
+
+            result.push(cookie[0]);
+        });
+
+        return result.uniq();
+    }
+
+    function get (key, options) {
+        var options = _options(options);
         var matches = window.document.cookie.match(RegExp.escape(key.encodeURIComponent()) + '=([^;]*)', 'g');
 
         if (!matches) {
@@ -1101,69 +1187,39 @@ miniLOL.Cookie = {
         }
 
         return result;
-    },
+    }
 
-    set: function (key, value, options) {
-        var options = miniLOL.Cookie.options(options);
+    function set (key, value, options) {
+        var options = _options(options);
 
         if (!options.raw) {
             value = miniLOL.JSON.serialize(value) || value;
         }
 
-        window.document.cookie = miniLOL.Cookie.encode(key, value, options);
-    },
+        window.document.cookie = encode(key, value, options);
+    }
 
-    remove: function (key, options) {
-        window.document.cookie = miniLOL.Cookie.encode(key, '', Object.extend(miniLOL.Cookie.options(options), {
+    function remove (key, options) {
+        window.document.cookie = encode(key, '', Object.extend(_options(options), {
             expires: new Date(0)
         }));
-    },
-
-    clear: function () {
-        miniLOL.Cookie.keys().each(function (cookie) {
-            miniLOL.Cookie.remove(cookie);
-        });
-    },
-
-    keys: function () {
-        var result = [];
-
-        $A(window.document.cookie.split(/; /)).each(function (cookie) {
-            cookie = cookie.split(/=/);
-
-            if (cookie[1]) {
-                result.push(cookie[0]);
-            }
-        });
-
-        return result.uniq();
-    },
-
-    encode: function (key, value, options) {
-        return "#{key}=#{value}; #{maxAge}#{expires}#{path}#{domain}#{secure}".interpolate({
-            key:   key.encodeURIComponent(),
-            value: value.encodeURIComponent(),
-
-            maxAge:  (!Object.isUndefined(options.maxAge))  ? 'max-age=#{0}; '.interpolate([options.maxAge]) : '',
-            expires: (!Object.isUndefined(options.expires)) ? 'expires=#{0}; '.interpolate([options.expires.toUTCString()]) : '',
-            path:    (!Object.isUndefined(options.path))    ? 'path=#{0}; '.interpolate([options.path]) : '',
-            domain:  (!Object.isUndefined(options.domain))  ? 'domain=#{0}; '.interpolate([options.domain]) : '',
-
-            secure: (options.secure) ? 'secure' : ''
-        });
-    },
-
-    options: function (options) {
-        return Object.extend({
-            expires: new Date(new Date().getTime() + 3600 * 1000),
-            path:    '',
-            domain:  '',
-            secure:  '',
-
-            raw: false
-        }, options || {});
     }
-};
+
+    function clear () {
+        keys().each(function (cookie) {
+            remove(cookie);
+        });
+    }
+
+    return {
+        encode: encode,
+        keys:   keys,
+        get:    get,
+        set:    set,
+        remove: remove,
+        clear:  clear
+    };
+})();
 
 miniLOL.Storage = Class.create({
     initialize: function (name, backend) {

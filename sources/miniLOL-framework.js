@@ -21,7 +21,11 @@
 
 if (!Object.isObject(window.miniLOL)) {
     window.miniLOL = {
-        error: Prototype.emptyFunction    
+        error: Prototype.emptyFunction,
+
+        Framework: {
+            Version: '0.1'
+        }
     };
 }
 

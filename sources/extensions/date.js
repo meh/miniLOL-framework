@@ -17,9 +17,3 @@
  * along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.         *
  ****************************************************************************/
 
-//= require "extensions/function"
-//= require "extensions/object"
-//= require "extensions/string"
-//= require "extensions/number"
-//= require "extensions/date"
-//= require "extensions/element"

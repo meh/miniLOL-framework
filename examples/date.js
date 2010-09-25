@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script type="text/javascript" src="../dependencies/prototype.js"></script>
-    <script type="text/javascript" src="../build/miniLOL-framework.js"></script>
+    <script type="text/javascript" src="../sources/prototype.js"></script>
+    <script type="text/javascript" src="../dist/miniLOL-framework.js"></script>
 
     <script type="text/javascript">// <![CDATA[
 
