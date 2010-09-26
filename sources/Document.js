@@ -1,25 +1,34 @@
-/****************************************************************************
- * Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]          *
- *                                                                          *
- * This file is part of miniLOL.                                            *
- *                                                                          *
- * miniLOL is free software: you can redistribute it and/or modify          *
- * it under the terms of the GNU Affero General Public License as           *
- * published by the Free Software Foundation, either version 3 of the       *
- * License, or (at your option) any later version.                          *
- *                                                                          *
- * miniLOL is distributed in the hope that it will be useful,               *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
- * GNU Affero General Public License for more details.                      *
- *                                                                          *
- * You should have received a copy of the GNU Affero General Public License *
- * along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.         *
+/* Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]
+ *
+ * This file is part of miniLOL.
+ *
+ * miniLOL is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * miniLOL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
+/**
+ *  miniLOL.Document
+ *
+ *  Namespace to work with Documents.
+**/
 miniLOL.Document = (function () {
+    /**
+     *  miniLOL.Document.fix(dom) -> Document
+     *  - dom (Document): A Document object.
+     *
+     *  Fix the given document to have some useful standard functions cross-platformly.
+    **/
     var fix;
-
     if (Prototype.Browser.IE) {
         fix = function (obj) {
             if (!obj) {
@@ -75,6 +84,13 @@ miniLOL.Document = (function () {
         }
     }
 
+    /**
+     *  miniLOL.Document.check(xml, path) -> String
+     *  - xml (Document): The DOMDocument to check.
+     *  - path (String): The path where the XML was retrieved from.
+     *
+     *  Check if the Document has some parsing errors, and return the error message if present.
+    **/
     function check (xml, path) {
         var error = false;
 
