@@ -60,7 +60,7 @@ var _format = {
         tmp.setDate(1);
         tmp.setMonth(0);
 
-        return (date.getTime() - tmp.getTime()) / 1000 / 60 / 60 / 24).ceil();
+        return ((date.getTime() - tmp.getTime()) / 1000 / 60 / 60 / 24).ceil();
     },
 
     'W': function (date) {
@@ -69,7 +69,7 @@ var _format = {
         tmp.setDate(1);
         tmp.setMonth(0);
 
-        return (date.getTime() - tmp.getTime()) / 1000 / 60 / 60 / 24 / 7).ceil();
+        return ((date.getTime() - tmp.getTime()) / 1000 / 60 / 60 / 24 / 7).ceil();
     },
 
     'F': function (date) {
@@ -130,7 +130,7 @@ var _format = {
         tmp.setSeconds(0);
         tmp.setMinutes(0);
 
-        return (date.getTime() - tmp.getTime()) / 86.4;
+        return ((date.getTime() - tmp.getTime()) / 1000 / 86.4).toFixed(2);
     },
 
     'g': function (date) {
@@ -189,7 +189,11 @@ Object.extend(Date, (function () {
 
 Object.extend(Date.prototype, (function () {
     function format (string) {
-            
+        var date = this;
+
+        return string.gsub(/%(.)/, function (match) {
+            return (_format[match[1]]) ? _format[match[1]](date) : '';
+        });
     }
 
     return {

@@ -747,7 +747,7 @@ Object.extend(Number.prototype, (function () {
         }
     }
 
-    function ordinalize () {
+    function ordinalized () {
         switch (parseInt(this)) {
             case 1:  return 'st';
             case 2:  return 'nd';
@@ -796,7 +796,7 @@ Object.extend(Number.prototype, (function () {
         toChar: toChar,
         digits: digits,
 
-        ordinalize: ordinalize
+        ordinalized: ordinalized
     };
 })());
 /* Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]
@@ -848,24 +848,127 @@ var _format = {
     },
 
     'S': function (date) {
-        return date.getDate().ordinalize();
+        return date.getDate().ordinalized();
     },
 
-    'b': function (date) {
-        return Date.months[date.getMonth()].substr(0, 3);
+    'w': function (date) {
+        return date.getDay();
     },
 
-    'B': function (date) {
+    'z': function (date) {
+        var tmp = new Date();
+        tmp.setFullYear(date.getFullYear());
+        tmp.setDate(1);
+        tmp.setMonth(0);
+
+        return ((date.getTime() - tmp.getTime()) / 1000 / 60 / 60 / 24).ceil();
+    },
+
+    'W': function (date) {
+        var tmp = new Date();
+        tmp.setFullYear(date.getFullYear());
+        tmp.setDate(1);
+        tmp.setMonth(0);
+
+        return ((date.getTime() - tmp.getTime()) / 1000 / 60 / 60 / 24 / 7).ceil();
+    },
+
+    'F': function (date) {
         return Date.months[date.getMonth()];
     },
 
     'd': function (date) {
-        return date.getMonth().toPaddedString(2);
+        return (date.getMonth() + 1).toPaddedString(2);
+    },
+
+    'M': function (date) {
+        return Date.months[date.getMonth()].substr(0, 3);
+    },
+
+    'n': function (date) {
+        return date.getMonth() + 1;
+    },
+
+    't': function (date) {
+        if (date.getMonth() % 2 == 0) {
+            return 31;
+        }
+
+        if (date.getMonth() == 1) {
+            return (date.getFullYear() % 4 == 0) ? 29 : 28;
+        }
+
+        return 30;
+    },
+
+    'L': function (date) {
+        return (date.getFullYear() % 4) ? 0 : 1;
+    },
+
+    'o': function (date) {
+        return date.getFullYear();
+    },
+
+    'Y': function (date) {
+        return date.getFullYear();
+    },
+
+    'y': function (date) {
+        return date.getFullYear().toString().substr(2, 2);
+    },
+
+    'a': function (date) {
+        return (date.getHours() > 12) ? 'pm' : 'am';
+    },
+
+    'A': function (date) {
+        return (date.getHours() > 12) ? 'PM' : 'AM';
+    },
+
+    'B': function (date) {
+        var tmp = new Date(date);
+        tmp.setHours(0);
+        tmp.setSeconds(0);
+        tmp.setMinutes(0);
+
+        return ((date.getTime() - tmp.getTime()) / 1000 / 86.4).toFixed(2);
+    },
+
+    'g': function (date) {
+        return (date.getHours() + 1 > 12) ? (date.getHours() + 1) / 2 : date.getHours() + 1;
+    },
+
+    'g': function (date) {
+        return date.getHours();
+    },
+
+    'h': function (date) {
+        return ((date.getHours() + 1 > 12) ? (date.getHours() + 1) / 2 : date.getHours() + 1).toPaddedString(2);
+    },
+
+    'H': function (date) {
+        return date.getHours().toPaddedString(2);
+    },
+
+    'i': function (date) {
+        return date.getMinutes().toPaddedString(2);
+    },
+
+    's': function (date) {
+        return date.getSeconds().toPaddedString(2);
+    },
+
+    'u': function (date) {
+        return date.getMilliseconds() * 1000;
+    },
+
+    'r': function (date) {
+        return date.toUTCString();
+    },
+
+    'U': function (date) {
+        return date.getTime();
     }
-
-
-
-
 };
 
 Object.extend(Date, (function () {
@@ -884,7 +987,11 @@ Object.extend(Date, (function () {
 
 Object.extend(Date.prototype, (function () {
     function format (string) {
+        var date = this;
 
+        return string.gsub(/%(.)/, function (match) {
+            return (_format[match[1]]) ? _format[match[1]](date) : '';
+        });
     }
 
     return {
