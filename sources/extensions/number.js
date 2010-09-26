@@ -131,6 +131,15 @@ Object.extend(Number.prototype, (function () {
         }
     }
 
+    function ordinalized () {
+        switch (parseInt(this)) {
+            case 1:  return 'st';
+            case 2:  return 'nd';
+            case 3:  return 'rd';
+            default: return 'th';
+        }
+    }
+
     return {
         milliseconds: milliseconds,
         ms:           milliseconds,
@@ -169,6 +178,8 @@ Object.extend(Number.prototype, (function () {
 
         toBase: toBase,
         toChar: toChar,
-        digits: digits
+        digits: digits,
+
+        ordinalized: ordinalized
     };
 })());
