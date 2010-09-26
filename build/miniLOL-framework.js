@@ -280,6 +280,23 @@ Object.extend(Object, (function () {
     };
 })());
 
+/* Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]
+ *
+ * This file is part of miniLOL.
+ *
+ * miniLOL is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * miniLOL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
+ ****************************************************************************/
 
 Object.extend(String, (function () {
     function fromAttributes (attributes) {
@@ -310,21 +327,37 @@ Object.extend(String, (function () {
 })());
 
 Object.extend(String.prototype, (function () {
-    function toQueryParams () {
+
+    function toQueryParams (separator) {
+        if (!Object.isRegExp(separator)) {
+            separator = /&/;
+        }
+
         var result  = {};
-        var matches = this.match(/[?#](.*)$/);
+        var matches = this.match(/[?#](.*?)([#?]|$)/);
 
         if (!matches) {
             return result;
         }
 
-        var blocks = matches[1].split(/&/);
+        var blocks = matches[1].split(separator);
         for (var i = 0; i < blocks.length; i++) {
             var parts = blocks[i].split(/=/);
             var name  = parts[0].decodeURIComponent();
+            var value = parts[1]
 
-            if (parts[1]) {
-                result[name] = parts[1].decodeURIComponent();
+            if (value) {
+                if (!Object.isUndefined(result[name])) {
+                    if (!Object.isArray(result[name])) {
+                        result[name] = [result[name], value];
+                    }
+                    else {
+                        result[name].push(value)
+                    }
+                }
+                else {
+                    result[name] = value.decodeURIComponent();
+                }
             }
             else {
                 result[name] = true;
@@ -379,6 +412,89 @@ Object.extend(String.prototype, (function () {
         return (matches) ? matches[1] : '';
     }
 
+    function splitEvery (num) {
+        var result = new Array;
+
+        for (var i = 0; i < this.length; i += num) {
+            result.push(this.substr(i, num));
+        }
+
+        return result;
+    }
+
+    function test (pattern) {
+        return pattern.test(this);
+    }
+
+    function commonChars (string) {
+        return this.toArray().intersect(string.toArray());
+    }
+
+    function format (template) {
+        var formatted = this;
+
+        for (var i in template) {
+            formatted = formatted.replace(new RegExp('\\{' + i + '\\}', 'g'), template[i].toString());
+        }
+
+        return formatted;
+    }
+
+    function reverse () {
+        return this.toArray().reverse().join('');
+    }
+
+    function translate (table, second) {
+        var result = this;
+
+        if (second) {
+            for (key in table) {
+                if (!second[key]) {
+                    throw new Error("The second table value is missing.");
+                }
+
+                if (table[key].is(RegExp)) {
+                    result = result.replace(eval(table[key].global ? table[key].toString() : table[key].toString() + "g"));
+                }
+                else {
+                    result = result.replace(new RegExp(table[key], "g"), second[key]);
+                }
+            }
+        }
+        else {
+            for each (match in table) {
+                if (match.length != 2) {
+                    throw new Error("The array has to be [regex, translation].");
+                }
+
+                if (match[0].is(RegExp)) {
+                    result = result.replace(eval(match[0].global ? match[0].toString() : match[0].toString() + "g"), match[1]);
+                }
+                else {
+                    result = result.replace(new RegExp(match[0], "g"), match[1]);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    function toNumber (integer) {
+        return (integer) ? parseInt(this) : parseFloat(this);
+    };
+
+    function toBase (base) {
+        return this.toNumber().toBase(base);
+    };
+
+    function fromBase (base) {
+        return parseInt(this, base);
+    };
+
+    function toCode () {
+        return this.charCodeAt(0);
+    };
+
     var _encodeURI          = window.encodeURI;
     var _decodeURI          = window.decodeURI;
     var _encodeURIComponent = window.encodeURIComponent;
@@ -402,6 +518,7 @@ Object.extend(String.prototype, (function () {
 
     return {
         toQueryParams: toQueryParams,
+        parseQuery:    toQueryParams,
         toXML:         toXML,
 
         isURL:    isURL,
@@ -411,6 +528,18 @@ Object.extend(String.prototype, (function () {
 
         getHashFragment: getHashFragment,
 
+        splitEvery:  splitEvery,
+        test:        test,
+        commonChars: commonChars,
+        format:      format,
+        reverse:     reverse,
+        translate:   translate,
+
+        toNumber: toNumber,
+        toBase:   toBase,
+        fromBase: fromBase,
+        toCode:   toCode,
+
         encodeURI:          encodeURI,
         decodeURI:          decodeURI,
         encodeURIComponent: encodeURIComponent,
@@ -419,6 +548,10 @@ Object.extend(String.prototype, (function () {
 })());
 
 Object.extend(Number.prototype, (function () {
+    function milliseconds () {
+        return this * 1000;
+    }
+
     function seconds () {
         return this;
     }
@@ -443,7 +576,96 @@ Object.extend(Number.prototype, (function () {
         return this * 60 * 60 * 24 * 375;
     }
 
+    function upTo (num, iterator, context) {
+        $R(this, num+1, true).each(iterator, context);
+        return this;
+    }
+
+    function isEven () {
+        return this % 2 == 0;
+    }
+
+    function isOdd () {
+        return this % 2 != 0;
+    }
+
+    function abs () {
+        return Math.abs(this);
+    }
+
+    function round () {
+        return Math.round(this);
+    }
+
+    function ceil () {
+        return Math.ceil(this);
+    }
+
+    function floor () {
+        return Math.floor(this);
+    }
+
+    function log () {
+        return Math.log(this);
+    }
+
+    function pow (exp) {
+        return Math.pow(this, exp);
+    }
+
+    function sqrt () {
+        return Math.sqrt(this);
+    }
+
+    function sin () {
+        return Math.sin(this);
+    }
+
+    function cos () {
+        return Math.cos(this);
+    }
+
+    function tan () {
+        return Math.tan(this);
+    }
+
+    function asin () {
+        return Math.asin(this);
+    }
+
+    function acos () {
+        return Math.acos(this);
+    }
+
+    function atan () {
+        return Math.atan(this);
+    }
+
+    function toBase (base) {
+        return this.toString(base).toUpperCase();
+    }
+
+    function toChar () {
+        return String.fromCharCode(this);
+    }
+
+    function digits () {
+        var matches = this.toString().match(/e(.*)$/);
+
+        if (matches) {
+            return (matches[1].toNumber() > 0)
+                ? 1+matches[1].toNumber()
+                : 0;
+        }
+        else {
+            return this.toString().length;
+        }
+    }
+
     return {
+        milliseconds: milliseconds,
+        ms:           milliseconds,
+
         seconds: seconds,
         second:  seconds,
         minutes: minutes,
@@ -455,9 +677,50 @@ Object.extend(Number.prototype, (function () {
         weeks:   weeks,
         week:    weeks,
         years:   years,
-        year:    years
+        year:    years,
+
+        upTo: upTo,
+
+        isEven: isEven,
+        isOdd:  isOdd,
+
+        abs:   abs,
+        round: round,
+        ceil:  ceil,
+        floor: floor,
+        log:   log,
+        pow:   pow,
+        sqrt:  sqrt,
+        sin:   sin,
+        cos:   cos,
+        tan:   tan,
+        asin:  asin,
+        acos:  acos,
+        atan:  atan,
+
+        toBase: toBase,
+        toChar: toChar,
+        digits: digits
     };
 })());
+/* Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]
+ *
+ * This file is part of miniLOL.
+ *
+ * miniLOL is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * miniLOL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.
+ ****************************************************************************/
+
 
 window.Element.addMethods((function () {
     function load (path, options) {
@@ -621,6 +884,7 @@ window.Element.addMethods((function () {
         toObject:           toObject
     };
 })());
+
 
 if (!Object.isObject(window.miniLOL)) {
     window.miniLOL = {
@@ -1123,11 +1387,28 @@ miniLOL.JSON.unserialize = function (string) {
         return null;
     }
 };
+/* Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]
+ *
+ * This file is part of miniLOL.
+ *
+ * miniLOL is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * miniLOL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
+ ****************************************************************************/
 
 miniLOL.Cookie = (function () {
     function _options (options) {
         return Object.extend({
-            expires: new Date(new Date().getTime() + 3600 * 1000),
+            expires: new Date(Date.now() + (1).day().ms()),
             path:    '',
             domain:  '',
             secure:  '',

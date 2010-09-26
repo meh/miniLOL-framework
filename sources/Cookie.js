@@ -1,31 +1,30 @@
-/****************************************************************************
- * Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]          *
- *                                                                          *
- * This file is part of miniLOL.                                            *
- *                                                                          *
- * miniLOL is free software: you can redistribute it and/or modify          *
- * it under the terms of the GNU Affero General Public License as           *
- * published by the Free Software Foundation, either version 3 of the       *
- * License, or (at your option) any later version.                          *
- *                                                                          *
- * miniLOL is distributed in the hope that it will be useful,               *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
- * GNU Affero General Public License for more details.                      *
- *                                                                          *
- * You should have received a copy of the GNU Affero General Public License *
- * along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.         *
+/* Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]
+ *
+ * This file is part of miniLOL.
+ *
+ * miniLOL is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * miniLOL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
 /** section: Language
  *  miniLOL.Cookie
  *
- *  Cookie is a singleton to easily manage cookies.
+ *  A singleton to easily manage cookies.
 **/
 miniLOL.Cookie = (function () {
     function _options (options) {
         return Object.extend({
-            expires: new Date(new Date().getTime() + ((1).day() * 1000)),
+            expires: new Date(Date.now() + (1).day().ms()),
             path:    '',
             domain:  '',
             secure:  '',
@@ -120,7 +119,7 @@ miniLOL.Cookie = (function () {
     }
 
     /**
-     *  miniLOL.Cookie.set(key, value[, options = {})
+     *  miniLOL.Cookie.set(key, value[, options = {}]) -> null
      *  - options (Object): Options on setting.
      *
      *  Sets a cookie with the given name/value. If the object is JSONable it's JSONified.
@@ -144,7 +143,7 @@ miniLOL.Cookie = (function () {
     }
 
     /**
-     *  miniLOL.Cookie.remove(key[, options = {}])
+     *  miniLOL.Cookie.remove(key[, options = {}]) -> null
      *  - options (Object): Options to pass to miniLOL.Cookie.encode, be sure
      *  to use the same options you used when you set the cookie you want to delete.
      *
@@ -157,7 +156,7 @@ miniLOL.Cookie = (function () {
     }
 
     /**
-     *  miniLOL.Cookie.clear()
+     *  miniLOL.Cookie.clear() -> null
      *
      *  Remove all cookies.
     **/

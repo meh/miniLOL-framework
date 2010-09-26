@@ -46,6 +46,92 @@ Object.extend(Number.prototype, (function () {
         return this * 60 * 60 * 24 * 375;
     }
 
+    function upTo (num, iterator, context) {
+        $R(this, num+1, true).each(iterator, context);
+        return this;
+    }
+
+    function isEven () {
+        return this % 2 == 0;
+    }
+
+    function isOdd () {
+        return this % 2 != 0;
+    }
+
+    function abs () {
+        return Math.abs(this);
+    }
+
+    function round () {
+        return Math.round(this);
+    }
+
+    function ceil () {
+        return Math.ceil(this);
+    }
+
+    function floor () {
+        return Math.floor(this);
+    }
+
+    function log () {
+        return Math.log(this);
+    }
+
+    function pow (exp) {
+        return Math.pow(this, exp);
+    }
+
+    function sqrt () {
+        return Math.sqrt(this);
+    }
+
+    function sin () {
+        return Math.sin(this);
+    }
+
+    function cos () {
+        return Math.cos(this);
+    }
+
+    function tan () {
+        return Math.tan(this);
+    }
+
+    function asin () {
+        return Math.asin(this);
+    }
+
+    function acos () {
+        return Math.acos(this);
+    }
+
+    function atan () {
+        return Math.atan(this);
+    }
+
+    function toBase (base) {
+        return this.toString(base).toUpperCase();
+    }
+
+    function toChar () {
+        return String.fromCharCode(this);
+    }
+
+    function digits () {
+        var matches = this.toString().match(/e(.*)$/);
+
+        if (matches) {
+            return (matches[1].toNumber() > 0)
+                ? 1+matches[1].toNumber()
+                : 0;
+        }
+        else {
+            return this.toString().length;
+        }
+    }
+
     return {
         milliseconds: milliseconds,
         ms:           milliseconds,
@@ -61,6 +147,29 @@ Object.extend(Number.prototype, (function () {
         weeks:   weeks,
         week:    weeks,
         years:   years,
-        year:    years
+        year:    years,
+
+        upTo: upTo,
+
+        isEven: isEven,
+        isOdd:  isOdd,
+
+        abs:   abs,
+        round: round,
+        ceil:  ceil,
+        floor: floor,
+        log:   log,
+        pow:   pow,
+        sqrt:  sqrt,
+        sin:   sin,
+        cos:   cos,
+        tan:   tan,
+        asin:  asin,
+        acos:  acos,
+        atan:  atan,
+
+        toBase: toBase,
+        toChar: toChar,
+        digits: digits
     };
 })());

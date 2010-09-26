@@ -19,6 +19,12 @@
 
 //= require "preparation"
 
+/**
+ *  miniLOL
+ *
+ *  The main miniLOL namespace.
+**/
+
 if (!Object.isObject(window.miniLOL)) {
     window.miniLOL = {
         error: Prototype.emptyFunction,

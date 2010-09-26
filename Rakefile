@@ -6,7 +6,7 @@ require 'sprockets'
 # I suggest using 20100616 version, because later versions break prototype.js on IE6
 COMPILER = 'closure-compiler' # --compilation_level ADVANCED_OPTIMIZATIONS'
 
-CLEAN.include('build/**')
+CLEAN.include(FileList['build/**', 'sources/**/.*.pdoc.yaml'])
 
 module Helper
     ROOT_DIR = File.expand_path(File.dirname(__FILE__))
