@@ -21,25 +21,62 @@
 Date.weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 Date.months   = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+var _parse = {
+    '%': /(%)/,
+    'd': /(\d\d)/
+}
+
 var _format = {
+    // a literal %
     '%': function (date) {
         return '%';
     },
 
+    // locale's abbreviated weekday name (e.g., Sun)
+    'a': function (date) {
+        return Date.weekDays[date.getDay()].substr(0, 3);
+    },
+
+    // locale's full weekday name (e.g., Sunday)
+    'A': function (date) {
+        return Date.weekDays[date.getDay()];
+    },
+
+    // locale's abbreviated month name (e.g., Jan)
+    'b': function (date) {
+        return Date.months[date.getMonth()].substr(0, 3);
+    },
+
+    // locale's full month name (e.g., January)
+    'B': function (date) {
+        return Date.months[date.getMonth()];
+    },
+
+    // locale's date and time (e.g., Thu Mar  3 23:05:25 2005)
+    'c': function (date) {
+        return date.format('%a %b %_d %X %Y');
+    },
+
+    // century; like %Y, except omit last two digits (e.g., 20)
+    'C': function (date) {
+        return date.getFullYear().substr(0, 2);
+    },
+
+    // day of month (e.g, 01)
     'd': function (date) {
         return date.getDate().toPaddedString(2);
     },
 
     'D': function (date) {
-        return Date.weekDays[date.getDay()].substr(0, 3);
+        return date.format('%m/%d/%y');
+    },
+
+    'd': function (date) {
+        return (date.getMonth() + 1).toPaddedString(2);
     },
 
     'j': function (date) {
         return date.getDate();
-    },
-
-    'l': function (date) {
-        return Date.weekDays[date.getDay()];
     },
 
     'N': function (date) {
@@ -70,18 +107,6 @@ var _format = {
         tmp.setMonth(0);
 
         return ((date.getTime() - tmp.getTime()) / 1000 / 60 / 60 / 24 / 7).ceil();
-    },
-
-    'F': function (date) {
-        return Date.months[date.getMonth()];
-    },
-
-    'd': function (date) {
-        return (date.getMonth() + 1).toPaddedString(2);
-    },
-
-    'M': function (date) {
-        return Date.months[date.getMonth()].substr(0, 3);
     },
 
     'n': function (date) {
@@ -176,9 +201,9 @@ Object.extend(Date, (function () {
     /**
      *  Date.parse(string[, date]) -> Date
     **/
-    function parse (string, date) {
-        if (!string.include('%')) {
-            return _parse(string);
+    function parse (format, string) {
+        if (!format.include('%')) {
+            return _parse(format);
         }
     }
 
@@ -188,11 +213,76 @@ Object.extend(Date, (function () {
 })());
 
 Object.extend(Date.prototype, (function () {
-    function format (string) {
+    /**
+     *  Date#format(format) -> String
+     *  - format (String): The date format.
+     *
+     *  Format a string with the given format (lol redundancy).
+     *
+     *  The format string is date-like (date as in the *nix command).
+     *
+     *  %%     a literal %
+     *
+     *  %a     locale's abbreviated weekday name (e.g., Sun)
+     *
+     *  %A     locale's full weekday name (e.g., Sunday)
+     *
+     *  %b     locale's abbreviated month name (e.g., Jan)
+     *
+     *  %B     locale's full month name (e.g., January)
+     *
+     *  %c     locale's date and time (e.g., Thu Mar  3 23:05:25 2005)
+     *
+     *  %C     century; like %Y, except omit last two digits (e.g., 20)
+     *
+     *  %d     day of month (e.g, 01)
+     *
+     *
+     *  %w     day of week (0..6); 0 is Sunday
+     *
+     *  %W     week number of year, with Monday as first day of week (00..53)
+     *
+     *  %x     locale's date representation (e.g., 12/31/99)
+     *
+     *  %X     locale's time representation (e.g., 23:13:48)
+     *
+     *  %y     last two digits of year (00..99)
+     *
+     *  %Y     year
+     *
+     *  %z     +hhmm numeric timezone (e.g., -0400)
+     *
+     *  %:z    +hh:mm numeric timezone (e.g., -04:00)
+     *
+     *  %::z   +hh:mm:ss numeric time zone (e.g., -04:00:00)
+     *
+     *  %:::z  numeric  time  zone  with  :  to necessary precision (e.g., -04,+05:30)
+     *
+     *  %Z     alphabetic time zone abbreviation (e.g., EDT)
+     *
+     *  By default, date  pads  numeric  fields  with  zeroes.   The  following
+     *  optional flags may follow `%':
+     *
+     *  -      (hyphen) do not pad the field
+     *
+     *  _      (underscore) pad with spaces
+     *
+     *  0      (zero) pad with zeros
+     *
+     *  ^      use upper case if possible
+     *
+     *  #      use opposite case if possible
+     *
+     *  After  any  flags  comes  an optional field width, as a decimal number;
+     *  then an optional modifier, which is either E to use the locale's alter‐
+     *  nate  representations  if available, or O to use the locale's alternate
+     *  numeric symbols if available.
+    **/
+    function format (format) {
         var date = this;
 
-        return string.gsub(/%(.)/, function (match) {
-            return (_format[match[1]]) ? _format[match[1]](date) : '';
+        return format.gsub(/%([\-_0^#])?(.)/, function (match) {
+            return (_format[match[1]]) ? _format[match[1]](date) : match[1];
         });
     }
 

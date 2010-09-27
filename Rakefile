@@ -88,8 +88,8 @@ task :framework do
 
     if updated
         Helper.sprocketize(
-            :path   => 'sources',
-            :source => 'miniLOL-framework.js'
+            :path           => 'sources',
+            :source         => 'miniLOL-framework.js'
         )
     end
 end

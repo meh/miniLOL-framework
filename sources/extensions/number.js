@@ -131,6 +131,51 @@ Object.extend(Number.prototype, (function () {
         }
     }
 
+    /**
+     *  Number#toPaddedString(length[, radix[, pad]]) -> String
+     *  - length (Number): The minimum length for the resulting string.
+     *  - radix (Number): An optional radix for the string representation,
+     *    defaults to 10 (decimal).
+     *  - pad (String): An optional wanted pad for the sting, defaults to '0'.
+     *
+     *  Returns a string representation of the number padded with leading `pad`s so
+     *  that the string's length is at least equal to `length`. Takes an optional
+     *  `radix` argument which specifies the base to use for conversion.
+     *
+     *  ##### Examples
+     *
+     *      (13).toPaddedString(4);
+     *      // -> "0013"
+     *
+     *      (13).toPaddedString(2);
+     *      // -> "13"
+     *
+     *      (13).toPaddedString(1);
+     *      // -> "13"
+     *
+     *      (13).toPaddedString(4, 16, " ")
+     *      // -> "   d"
+     *
+     *      (13).toPaddedString(4, 2);
+     *      // -> "1101"
+    **/
+    function toPaddedString (length, radix, pad) {
+        var pad    = (Object.isUndefined(pad)) ? '0' : pad.toString();
+        var string = this.toString(radix || 10);
+
+        return pad.times(length - string.length) + string;
+    }
+
+    /**
+     *  Number#ordinalized() -> String
+     *
+     *  Ordinalized string of a number.
+     *
+     *  ##### Examples
+     *      
+     *      (2).ordinalized()
+     *      // -> "nd"
+    **/
     function ordinalized () {
         switch (parseInt(this)) {
             case 1:  return 'st';
@@ -176,10 +221,11 @@ Object.extend(Number.prototype, (function () {
         acos:  acos,
         atan:  atan,
 
-        toBase: toBase,
-        toChar: toChar,
-        digits: digits,
+        toPaddedString: toPaddedString,
+        toBase:         toBase,
+        toChar:         toChar,
 
+        digits:      digits,
         ordinalized: ordinalized
     };
 })());

@@ -1,21 +1,20 @@
-/*
- Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]
-
- This file is part of miniLOL.
-
- miniLOL is free software: you can redistribute it and/or modify
- it under the terms of the GNU Affero General Public License as
- published by the Free Software Foundation, either version 3 of the
- License, or (at your option) any later version.
-
- miniLOL is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU Affero General Public License for more details.
-
- You should have received a copy of the GNU Affero General Public License
- along with miniLOL.  If not, see <http://www.gnu.org/licenses/>.
-*/
+/* Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]
+ *
+ * This file is part of miniLOL.
+ *
+ * miniLOL is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * miniLOL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
+ ****************************************************************************/
 
 /* Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]
  *
@@ -747,6 +746,13 @@ Object.extend(Number.prototype, (function () {
         }
     }
 
+    function toPaddedString (length, radix, pad) {
+        var pad    = (Object.isUndefined(pad)) ? '0' : pad.toString();
+        var string = this.toString(radix || 10);
+
+        return pad.times(length - string.length) + string;
+    }
+
     function ordinalized () {
         switch (parseInt(this)) {
             case 1:  return 'st';
@@ -792,10 +798,11 @@ Object.extend(Number.prototype, (function () {
         acos:  acos,
         atan:  atan,
 
-        toBase: toBase,
-        toChar: toChar,
-        digits: digits,
+        toPaddedString: toPaddedString,
+        toBase:         toBase,
+        toChar:         toChar,
 
+        digits:      digits,
         ordinalized: ordinalized
     };
 })());
@@ -822,9 +829,38 @@ Object.extend(Number.prototype, (function () {
 Date.weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 Date.months   = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+var _parse = {
+    '%': /(%)/,
+    'd': /(\d\d)/
+}
+
 var _format = {
     '%': function (date) {
         return '%';
+    },
+
+    'a': function (date) {
+        return Date.weekDays[date.getDay()].substr(0, 3);
+    },
+
+    'A': function (date) {
+        return Date.weekDays[date.getDay()];
+    },
+
+    'b': function (date) {
+        return Date.months[date.getMonth()].substr(0, 3);
+    },
+
+    'B': function (date) {
+        return Date.months[date.getMonth()];
+    },
+
+    'c': function (date) {
+        return date.format('%a %b %_d %X %Y');
+    },
+
+    'C': function (date) {
+        return date.getFullYear().substr(0, 2);
     },
 
     'd': function (date) {
@@ -832,15 +868,15 @@ var _format = {
     },
 
     'D': function (date) {
-        return Date.weekDays[date.getDay()].substr(0, 3);
+        return date.format('%m/%d/%y');
+    },
+
+    'd': function (date) {
+        return (date.getMonth() + 1).toPaddedString(2);
     },
 
     'j': function (date) {
         return date.getDate();
-    },
-
-    'l': function (date) {
-        return Date.weekDays[date.getDay()];
     },
 
     'N': function (date) {
@@ -871,18 +907,6 @@ var _format = {
         tmp.setMonth(0);
 
         return ((date.getTime() - tmp.getTime()) / 1000 / 60 / 60 / 24 / 7).ceil();
-    },
-
-    'F': function (date) {
-        return Date.months[date.getMonth()];
-    },
-
-    'd': function (date) {
-        return (date.getMonth() + 1).toPaddedString(2);
-    },
-
-    'M': function (date) {
-        return Date.months[date.getMonth()].substr(0, 3);
     },
 
     'n': function (date) {
@@ -974,9 +998,9 @@ var _format = {
 Object.extend(Date, (function () {
     var _parse = Date.parse
 
-    function parse (string, date) {
-        if (!string.include('%')) {
-            return _parse(string);
+    function parse (format, string) {
+        if (!format.include('%')) {
+            return _parse(format);
         }
     }
 
@@ -986,11 +1010,11 @@ Object.extend(Date, (function () {
 })());
 
 Object.extend(Date.prototype, (function () {
-    function format (string) {
+    function format (format) {
         var date = this;
 
-        return string.gsub(/%(.)/, function (match) {
-            return (_format[match[1]]) ? _format[match[1]](date) : '';
+        return format.gsub(/%([\-_0^#])?(.)/, function (match) {
+            return (_format[match[1]]) ? _format[match[1]](date) : match[1];
         });
     }
 
