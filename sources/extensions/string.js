@@ -1,4 +1,4 @@
-/* Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]
+/* Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org]
  *
  * This file is part of miniLOL.
  *
@@ -56,11 +56,11 @@ Object.extend(String.prototype, (function () {
      *  parameter/value pairs.
      *  
      *  This method is realy targeted at parsing query strings (hence the default 
-     *  value of`"&"` for the `separator` argument).
+     *  value of`'&'` for the `separator` argument).
      *  
      *  For this reason, it does _not_ consider anything that is either before a 
      *  question  mark (which signals the beginning of a query string) or beyond 
-     *  the hash symbol (`"#"`), and runs `decodeURIComponent()` on each 
+     *  the hash symbol (`'#'`), and runs `decodeURIComponent()` on each 
      *  parameter/value pair.
      *  
      *  [[String#toQueryParams]] also aggregates the values of identical keys into 
@@ -209,32 +209,32 @@ Object.extend(String.prototype, (function () {
         var result = this;
 
         if (second) {
-            for (key in table) {
+            Object.keys(table).each(function (key) {
                 if (!second[key]) {
-                    throw new Error("The second table value is missing.");
+                    throw new Error('The second table value is missing.');
                 }
                 
                 if (table[key].is(RegExp)) {
-                    result = result.replace(eval(table[key].global ? table[key].toString() : table[key].toString() + "g"));
+                    result = result.replace(eval(table[key].global ? table[key].toString() : table[key].toString() + 'g'));
                 }
                 else {
-                    result = result.replace(new RegExp(table[key], "g"), second[key]);
+                    result = result.replace(new RegExp(table[key], 'g'), second[key]);
                 }
-            }
+            });
         }
         else {
-            for each (match in table) {
+            Object.values(table).each(function (match) {
                 if (match.length != 2) {
-                    throw new Error("The array has to be [regex, translation].");
+                    throw new Error('The array has to be [regex, translation].');
                 }
 
                 if (match[0].is(RegExp)) {
-                    result = result.replace(eval(match[0].global ? match[0].toString() : match[0].toString() + "g"), match[1]);
+                    result = result.replace(eval(match[0].global ? match[0].toString() : match[0].toString() + 'g'), match[1]);
                 }
                 else {
-                    result = result.replace(new RegExp(match[0], "g"), match[1]);
+                    result = result.replace(new RegExp(match[0], 'g'), match[1]);
                 }
-            }
+            });
         }
 
         return result;

@@ -1,4 +1,4 @@
-/* Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]
+/* Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org]
  *
  * This file is part of miniLOL.
  *
@@ -30,7 +30,7 @@ miniLOL.History = {
     interval: 0.15,
 
     initialize: function () {
-        miniLOL.History.current = window.location.hash;
+        miniLOL.History.current = window.location.hash || '#';
 
         if (Prototype.Browser.Opera && history.navigationMode) {
             history.navigationMode = 'compatible';
@@ -82,8 +82,8 @@ miniLOL.History = {
         Default: function () {
             Event.observe(window, 'hashchange', function (event) {
                  Event.fire(document, ':url.change', (Prototype.Browser.Mozilla)
-                    ? window.location.hash.substring(1)
-                    : decodeURIComponent(window.location.hash.substring(1))
+                    ? window.location.hash
+                    : decodeURIComponent(window.location.hash)
                 );
             });
         },
@@ -111,7 +111,7 @@ miniLOL.History = {
                         doc.open();
                         doc.close();
 
-                        doc.location.hash = encodeURIComponent(hash.substring(1));
+                        doc.location.hash = encodeURIComponent(hash);
                     },
     
                     get: function () {
@@ -137,8 +137,8 @@ miniLOL.History = {
             }
 
             Event.fire(document, ':url.change', (Prototype.Browser.Mozilla)
-                ? window.location.hash.substring(1)
-                : decodeURIComponent(window.location.hash.substring(1))
+                ? window.location.hash
+                : decodeURIComponent(window.location.hash)
             );
         },
 

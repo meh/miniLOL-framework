@@ -1,4 +1,4 @@
-/* Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com]
+/* Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org]
  *
  * This file is part of miniLOL.
  *
@@ -17,12 +17,16 @@
  ****************************************************************************/
 
 Object.extend(Object, (function () {
+    function isObject (val) {
+        return typeof val == 'object';
+    }
+
     function isBoolean (val) {
         return typeof val == 'boolean' || val.constructor === Boolean;
     }
 
-    function isObject (val) {
-        return typeof val == 'object';
+    function isRegExp (val) {
+        return !Object.isUndefined(val) && val.constructor == window.RegExp;
     }
 
     function isDocument (val) {
@@ -107,8 +111,9 @@ Object.extend(Object, (function () {
     }
 
     return {
-        isBoolean:  isBoolean,
         isObject:   isObject,
+        isBoolean:  isBoolean,
+        isRegExp:   isRegExp,
         isDocument: isDocument,
         isXML:      isXML,
 

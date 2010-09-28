@@ -98,7 +98,7 @@ task :minify do
     if tmp = Helper.minify('build/miniLOL-framework.js')
         if tmp != 1
             Helper.miniHeader('build/miniLOL-framework.min.js',
-                '/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.doesntexist.org | meh.ffff@gmail.com] */'
+                '/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org] */'
             )
         end
     else
