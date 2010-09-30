@@ -59,75 +59,77 @@ miniLOL.JSON = Class.create({
 
     toString: function () {
         return miniLOL.JSON.serialize(this.data) || '{}';
+    },
+
+    Static: {
+        parse: function (raw) {
+            return new miniLOL.JSON(raw);
+        },
+
+        serializeSpecial: function (obj) {
+            if (typeof obj !== 'object') {
+                return obj;
+            }
+        
+            obj = Object.clone(obj);
+        
+            for (var key in obj) {
+                if (Object.isXML(obj[key])) {
+                    obj[key] = { __miniLOL_is_xml: true, value: String.fromXML(obj[key]) };
+                }
+                else if (Object.isFunction(obj[key])) {
+                    obj[key] = { __miniLOL_is_function: true, value: obj[key].toString() };
+                }
+                else {
+                    obj[key] = miniLOL.JSON.serializeSpecial(obj[key]);
+                }
+            }
+        
+            return obj;
+        },
+        
+        unserializeSpecial: function (obj) {
+            if (typeof obj !== 'object') {
+                return obj;
+            }
+            
+            obj = Object.clone(obj);
+        
+            for (var key in obj) {
+                if (obj[key].__miniLOL_is_xml) {
+                    obj[key] = obj[key].value.toXML();
+                }
+                else if (obj[key].__miniLOL_is_function) {
+                    obj[key] = Function.parse(obj[key].value);
+                }
+                else {
+                    obj[key] = miniLOL.JSON.unserializeSpecial(obj[key]);
+                }
+            }
+        
+            return obj;
+        },
+        
+        serialize: function (obj) {
+            try {
+                return Object.toJSON(miniLOL.JSON.serializeSpecial(obj));
+            }
+            catch (e) {
+                return false;
+            }
+        },
+        
+        unserialize: function (string) {
+            if (!Object.isString(string)) {
+                return null;
+            }
+        
+            try {
+                return miniLOL.JSON.unserializeSpecial(string.evalJSON());
+            }
+            catch (e) {
+                return null;
+            }
+        }
     }
 });
-
-miniLOL.JSON.parse = function (raw) {
-    return new miniLOL.JSON(raw);
-}
-
-miniLOL.JSON.serializeSpecial = function (obj) {
-    if (typeof obj !== 'object') {
-        return obj;
-    }
-
-    obj = Object.clone(obj);
-
-    for (var key in obj) {
-        if (Object.isXML(obj[key])) {
-            obj[key] = { __miniLOL_is_xml: true, value: String.fromXML(obj[key]) };
-        }
-        else if (Object.isFunction(obj[key])) {
-            obj[key] = { __miniLOL_is_function: true, value: obj[key].toString() };
-        }
-        else {
-            obj[key] = miniLOL.JSON.serializeSpecial(obj[key]);
-        }
-    }
-
-    return obj;
-};
-
-miniLOL.JSON.unserializeSpecial = function (obj) {
-    if (typeof obj !== 'object') {
-        return obj;
-    }
-    
-    obj = Object.clone(obj);
-
-    for (var key in obj) {
-        if (obj[key].__miniLOL_is_xml) {
-            obj[key] = obj[key].value.toXML();
-        }
-        else if (obj[key].__miniLOL_is_function) {
-            obj[key] = Function.parse(obj[key].value);
-        }
-        else {
-            obj[key] = miniLOL.JSON.unserializeSpecial(obj[key]);
-        }
-    }
-
-    return obj;
-};
-
-miniLOL.JSON.serialize = function (obj) {
-    try {
-        return Object.toJSON(miniLOL.JSON.serializeSpecial(obj));
-    }
-    catch (e) {
-        return false;
-    }
-};
-
-miniLOL.JSON.unserialize = function (string) {
-    if (!Object.isString(string)) {
-        return null;
-    }
-
-    try {
-        return miniLOL.JSON.unserializeSpecial(string.evalJSON());
-    }
-    catch (e) {
-        return null;
-    }
-};

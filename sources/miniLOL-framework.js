@@ -26,13 +26,15 @@
 
 if (!Object.isObject(window.miniLOL)) {
     window.miniLOL = {
-        error: Prototype.emptyFunction,
+        error: Function.empty,
 
         Framework: {
             Version: '0.1'
         }
     };
 }
+
+//= require "Class"
 
 //= require "utils"
 

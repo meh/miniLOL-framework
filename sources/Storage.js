@@ -29,7 +29,7 @@ miniLOL.Storage = Class.create({
      *  new miniLOL.Storage(name[, backend])
     **/
     initialize: function (name, backend) {
-        this.name    = name;
+        this.name = name;
         
         this.backend = (miniLOL.Storage.Instances[name])
             ? miniLOL.Storage.Instances[name]
@@ -119,12 +119,12 @@ miniLOL.Storage.Backend = Class.create(miniLOL.JSON, {
         }
 
         return $super(data);
-    }
-});
+    },
 
-Object.extend(miniLOL.Storage.Backend, {
-    filter: function (value) {
-        return value.replace(/\s/g, '');
+    Static: {
+        filter: function (value) {
+            return value.replace(/\s/g, '');
+        }
     }
 });
 
@@ -222,6 +222,6 @@ miniLOL.Storage.Backends = {
     }),
 
     Null: Class.create(miniLOL.Storage.Backend, {
-        save: Prototype.emptyFunction
+        save: Function.empty
     })
 };

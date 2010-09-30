@@ -16,6 +16,8 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
+Function.empty = function () { };
+
 Object.extend(Function, (function () {
     function parse (string) {
         matches = string.match(/^function\s*\((.*?)\)[\s\n]*\{([\s\S]*)\}[\s\n]*/m);

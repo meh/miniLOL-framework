@@ -16,6 +16,14 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
+/** section: Language
+ *  class Object
+ *
+ *  Extensions to the built-in [[Object]] object.
+ *
+ *  Some stuff is just an enhancement of Prototype's functions.
+**/
+
 Object.extend(Object, (function () {
     function isObject (val) {
         return typeof val == 'object';
@@ -27,6 +35,10 @@ Object.extend(Object, (function () {
 
     function isRegExp (val) {
         return !Object.isUndefined(val) && val.constructor == window.RegExp;
+    }
+
+    function isClass (val) {
+        return Boolean(val['__miniLOL.Class__']);
     }
 
     function isDocument (val) {
@@ -68,6 +80,118 @@ Object.extend(Object, (function () {
         }
 
         return result.substr(0, result.length - 1);
+    }
+
+    /**
+     *  Object.extend(destination, source[, overwrite]) -> Object
+     *  - destination (Object): The object to receive the new properties.
+     *  - source (Object): The object whose properties will be duplicated.
+     *  - overwrite (Boolean): Wether overwriting the value in destination or not. Defaults to true.
+     *
+     *  Copies all properties from the source to the destination object. Used by Prototype
+     *  to simulate inheritance (rather statically) by copying to prototypes.
+     *  
+     *  Documentation should soon become available that describes how Prototype implements
+     *  OOP, where you will find further details on how Prototype uses [[Object.extend]] and
+     *  [[Class.create]] (something that may well change in version 2.0). It will be linked
+     *  from here.
+     *  
+     *  Do not mistake this method with its quasi-namesake [[Element.extend]],
+     *  which implements Prototype's (much more complex) DOM extension mechanism.
+    **/
+    function extend (destination, source, overwrite) {
+        overwrite = (Object.isUndefined(overwrite)) ? true : Boolean(overwrite);
+
+        for (var property in source) {
+            if (!overwrite && !Object.isUndefined(destionation[property])) {
+                continue;
+            }
+
+            destination[property] = source[property];
+        }
+
+        return destination;
+    }
+
+    /**
+     *  Object.extendAttributes(destination, source[, overwrite]);
+     *  - destination (Object): The object to receive the new properties.
+     *  - source (Object): The object with the attribute definitions.
+     *  - overwrite (Boolean): Wether overwriting the value in destination or not. Defaults to true.
+     *
+     *  Extends an object with some emulated attributes.
+     *
+     *  ##### Examples
+     *
+     *      var lol = {};
+     *
+     *      Object.extendAttributes(lol, {
+     *          omg: {
+     *              get: function (value) {
+     *                  return value * 2;
+     *              }
+     *          }
+     *      });
+     *
+     *      lol.omg(2);
+     *      lol.omg();
+     *      // -> 4
+    **/
+    function extendAttributes (destination, source, overwrite) {
+        overwrite = (Object.isUndefined(overwrite)) ? true : Boolean(overwrite);
+
+        for (var property in source) {
+            if (!overwrite && !Object.isUndefined(destionation[property])) {
+                continue;
+            }
+
+            (function () {
+                var _saved;
+
+                destination[property] = function (value, force) {
+                    if (Object.isUndefined(value) && !force) {
+                        if (Object.isFunction(source[property].get)) {
+                            return source[property].get(_saved);
+                        }
+                        else {
+                            return _saved;
+                        }
+                    }
+                    else {
+                        if (Object.isFunction(source[property].set)) {
+                            return _saved = source[property].set(_saved, value);
+                        }
+                        else {
+                            return _saved = value;
+                        }
+                    }
+                };
+            })();
+        }
+
+        return destination;
+    }
+
+    /**
+     *  Object.without(object, exceptions) -> Object
+     *  - object (Object): The source object.
+     *  - exceptions (Array | String): Properties to exclude from the returned object.
+     *
+     *  Creates a shallow copy of the given object without the excluded properties.
+    **/
+    function without (object, exceptions) {
+        var result = Object.extend({}, object);
+
+        if (Object.isArray(exceptions)) {
+            exceptions.each(function (exception) {
+                delete result[exception];
+            });
+        }
+        else {
+            delete result[exceptions];
+        }
+
+        return result;
     }
 
     if (!Object.isFunction(Object.defineProperty)) {
@@ -114,11 +238,16 @@ Object.extend(Object, (function () {
         isObject:   isObject,
         isBoolean:  isBoolean,
         isRegExp:   isRegExp,
+        isClass:    isClass,
         isDocument: isDocument,
         isXML:      isXML,
 
         fromAttributes: fromAttributes,
         toQueryString:  toQueryString,
+
+        extend:           extend,
+        extendAttributes: extendAttributes,
+        without:          without,
 
         defineProperty:   defineProperty,
         defineProperties: defineProperties,
