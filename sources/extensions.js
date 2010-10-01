@@ -16,6 +16,12 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
+/**
+ *  == Extensions ==
+ *
+ *  Extensions to built-in/Prototype objects/classes.
+**/
+
 //= require "extensions/function"
 //= require "extensions/object"
 //= require "extensions/string"

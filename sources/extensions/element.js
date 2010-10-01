@@ -16,6 +16,12 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
+/** section: Extensions
+ * class Element
+ *
+ *  Extensions to the Prototype [[Element]] object.
+**/
+
 window.Element.addMethods((function () {
     function load (path, options) {
         if (options && !Object.isUndefined(options.frequency)) {

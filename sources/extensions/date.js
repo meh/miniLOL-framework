@@ -16,6 +16,12 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
+/** section: Extensions
+ *  class Date
+ *
+ *  Extensions to the built-in [[Date]] object.
+**/
+
 (function () {
 
 Date.weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

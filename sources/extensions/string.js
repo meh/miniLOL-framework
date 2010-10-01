@@ -16,6 +16,11 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
+/** section: Extensions
+ * class String
+ *
+ *  Extensions to the built-in [[String]] object.
+**/
 Object.extend(String, (function () {
     function fromAttributes (attributes) {
         var result = '';

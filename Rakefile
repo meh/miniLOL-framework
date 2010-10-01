@@ -6,15 +6,15 @@ require 'sprockets'
 # I suggest using 20100616 version, because later versions break prototype.js on IE6
 COMPILER = 'closure-compiler' # --compilation_level ADVANCED_OPTIMIZATIONS'
 
-CLEAN.include(FileList['build/**', 'sources/**/.*.pdoc.yaml'])
+CLEAN.include(FileList['build/**', 'sources/**/.*.pdoc.yaml', 'doc/'])
+
+ROOT_DIR  = File.expand_path(File.dirname(__FILE__))
+SRC_DIR   = File.join(ROOT_DIR, 'sources')
+BUILD_DIR = File.join(ROOT_DIR, 'build')
+DOC_DIR   = File.join(ROOT_DIR, 'doc')
+VERSION   = '0.1'
 
 module Helper
-    ROOT_DIR = File.expand_path(File.dirname(__FILE__))
-    SRC_DIR  = File.join(ROOT_DIR, 'src')
-    BUILD_DIR = File.join(ROOT_DIR, 'build')
-    DOC_DIR  = File.join(ROOT_DIR, 'doc')
-    VERSION  = '0.1'
-
     def self.minify (file, out=nil)
         if !File.exists?(file)
             return false
@@ -49,7 +49,7 @@ module Helper
         file.close
     end
 
-    def self.sprocketize(options = {})
+    def self.sprocketize (options = {})
         options = {
           :destination    => File.join(BUILD_DIR, options[:source]),
           :strip_comments => false
@@ -88,8 +88,8 @@ task :framework do
 
     if updated
         Helper.sprocketize(
-            :path           => 'sources',
-            :source         => 'miniLOL-framework.js'
+            :path   => 'sources',
+            :source => 'miniLOL-framework.js'
         )
     end
 end
@@ -159,4 +159,8 @@ task :minify do
         minified.write(File.read('build/prototype.min.js') + File.read('build/miniLOL-framework.min.js'))
         minified.close
     end
+end
+
+task :doc do
+    sh "pdoc -o '#{DOC_DIR}' -d '#{SRC_DIR}'"
 end

@@ -179,6 +179,7 @@ if (Prototype.Browser.IE) {
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
+
 /* Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org]
  *
  * This file is part of miniLOL.
@@ -905,6 +906,7 @@ Object.extend(Number.prototype, (function () {
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
+
 (function () {
 
 Date.weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -1122,6 +1124,7 @@ Object.extend(Date.prototype, (function () {
  * You should have received a copy of the GNU Affero General Public License
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
+
 
 window.Element.addMethods((function () {
     function load (path, options) {

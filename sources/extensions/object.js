@@ -16,7 +16,7 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-/** section: Language
+/** section: Extensions
  *  class Object
  *
  *  Extensions to the built-in [[Object]] object.
@@ -114,7 +114,7 @@ Object.extend(Object, (function () {
     }
 
     /**
-     *  Object.extendAttributes(destination, source[, overwrite]);
+     *  Object.extendAttributes(destination, source[, overwrite]) -> Object
      *  - destination (Object): The object to receive the new properties.
      *  - source (Object): The object with the attribute definitions.
      *  - overwrite (Boolean): Wether overwriting the value in destination or not. Defaults to true.
@@ -124,7 +124,7 @@ Object.extend(Object, (function () {
      *  ##### Examples
      *
      *      var lol = {};
-     *
+     *      
      *      Object.extendAttributes(lol, {
      *          omg: {
      *              get: function (value) {
@@ -132,10 +132,11 @@ Object.extend(Object, (function () {
      *              }
      *          }
      *      });
-     *
-     *      lol.omg(2);
-     *      lol.omg();
+     *      
+     *      lol.omg(2); // This sets the omg attribute to 2
+     *      lol.omg();  // This gets the omg attribute
      *      // -> 4
+     *
     **/
     function extendAttributes (destination, source, overwrite) {
         overwrite = (Object.isUndefined(overwrite)) ? true : Boolean(overwrite);
