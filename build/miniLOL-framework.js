@@ -1655,7 +1655,7 @@ miniLOL.History = {
                         doc.open();
                         doc.close();
 
-                        doc.location.hash = encodeURIComponent(hash);
+                        doc.location.hash = encodeURIComponent(hash.substring(1));
                     },
 
                     get: function () {
@@ -1695,7 +1695,7 @@ miniLOL.History = {
 
             if (hashes.actual != hashes.iframe) {
                 if (hashes.actual && hashes.actual == hashes.current) { // The user is moving in the History
-                    window.location.hash = miniLOL.History.current = hashes.iframe;
+                    window.location.hash = (miniLOL.History.current = hashes.iframe).substring(1);
                 }
                 else { // The user went to the actual URL
                     miniLOL.History.IE.put(miniLOL.History.current = hashes.actual);
