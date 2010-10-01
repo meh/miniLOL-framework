@@ -1587,8 +1587,11 @@ miniLOL.History = {
     initialize: function () {
         miniLOL.History.current = window.location.hash || '#';
 
-        if (Prototype.Browser.Opera && history.navigationMode) {
-            history.navigationMode = 'compatible';
+        if (Prototype.Browser.Opera) {
+            if (history.navigationMode) {
+                history.navigationMode = 'compatible';
+            }
+
         }
 
         Event.observe(document, ':url.change', function (event) {

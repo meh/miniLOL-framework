@@ -32,8 +32,16 @@ miniLOL.History = {
     initialize: function () {
         miniLOL.History.current = window.location.hash || '#';
 
-        if (Prototype.Browser.Opera && history.navigationMode) {
-            history.navigationMode = 'compatible';
+        if (Prototype.Browser.Opera) {
+            if (history.navigationMode) {
+                history.navigationMode = 'compatible';
+            }
+
+            // This doesn't work, somehow. RAGE.
+            //
+            // if (miniLOL.History.current == '#') {
+            //    window.location.hash = '';
+            // }
         }
 
         Event.observe(document, ':url.change', function (event) {
