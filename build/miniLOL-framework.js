@@ -1590,15 +1590,12 @@ miniLOL.History = {
     initialize: function () {
         miniLOL.History.current = window.location.hash || '#';
 
-        if (Prototype.Browser.Opera) {
-            if (history.navigationMode) {
-                history.navigationMode = 'compatible';
-            }
-
+        if (Prototype.Browser.Opera && history.navigationMode) {
+            history.navigationMode = 'compatible';
         }
 
         Event.observe(document, ':url.change', function (event) {
-            miniLOL.History.current = (Object.isString(event.memo)) ? event.memo : '';
+            miniLOL.History.current = event.memo.toString() || '#';
         });
 
         miniLOL.History.Initializers.get().call()
@@ -1632,8 +1629,8 @@ miniLOL.History = {
         Default: function () {
             Event.observe(window, 'hashchange', function (event) {
                  Event.fire(document, ':url.change', (Prototype.Browser.Mozilla)
-                    ? window.location.hash
-                    : decodeURIComponent(window.location.hash)
+                    ? window.location.hash || '#'
+                    : decodeURIComponent(window.location.hash || '#')
                 );
             });
         },
@@ -1687,8 +1684,8 @@ miniLOL.History = {
             }
 
             Event.fire(document, ':url.change', (Prototype.Browser.Mozilla)
-                ? window.location.hash
-                : decodeURIComponent(window.location.hash)
+                ? window.location.hash || '#'
+                : decodeURIComponent(window.location.hash || '#')
             );
         },
 
