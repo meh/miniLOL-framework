@@ -82,6 +82,54 @@ Object.extend(Object, (function () {
         return result.substr(0, result.length - 1);
     }
 
+    var buggy = (function () {
+        for (var property in { toString: 1 }) {
+            if (property === 'toString') {
+                return false;
+            }
+        }
+
+        return true;
+    })();
+
+    var keys;
+    var values;
+
+    if (buggy) {
+        var _keys   = Object.keys;
+        var _values = Object.values;
+
+        var fix = ['toString', 'valueOf'];
+
+        keys = function (object) {
+            var result = _keys(object);
+
+            fix.each(function (fix) {
+                if (object[fix] != Object.prototype[fix]) {
+                    result.push(fix);
+                }
+            });
+
+            return result;
+        }
+
+        values = function (object) {
+            var result = _values(object);
+
+            fix.each(function (fix) {
+                if (object[fix] != Object.prototype[fix]) {
+                    result.push(object[fix]);
+                }
+            });
+
+            return result;
+        }
+    }
+    else {
+        keys   = Object.keys;
+        values = Object.values;
+    }
+
     /**
      *  Object.extend(destination, source[, overwrite]) -> Object
      *  - destination (Object): The object to receive the new properties.
@@ -100,9 +148,12 @@ Object.extend(Object, (function () {
      *  which implements Prototype's (much more complex) DOM extension mechanism.
     **/
     function extend (destination, source, overwrite) {
-        overwrite = (Object.isUndefined(overwrite)) ? true : Boolean(overwrite);
+        var overwrite  = (Object.isUndefined(overwrite)) ? true : Boolean(overwrite);
+        var properties = Object.keys(source);
 
-        for (var property in source) {
+        for (var i = 0, length = properties.length; i < length; i++) {
+            var property = properties[i];
+
             if (!overwrite && !Object.isUndefined(destionation[property])) {
                 continue;
             }
@@ -245,6 +296,9 @@ Object.extend(Object, (function () {
 
         fromAttributes: fromAttributes,
         toQueryString:  toQueryString,
+
+        keys:   keys,
+        values: values,
 
         extend:           extend,
         extendAttributes: extendAttributes,

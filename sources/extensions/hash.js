@@ -16,16 +16,44 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-/**
- *  == Extensions ==
- *
- *  Extensions to built-in/Prototype objects/classes.
-**/
+Hash.addMethods((function () {
+    function clear () {
+        var tmp      = this._object;
+        this._object = {};
 
-//= require "extensions/function"
-//= require "extensions/object"
-//= require "extensions/string"
-//= require "extensions/number"
-//= require "extensions/hash"
-//= require "extensions/date"
-//= require "extensions/element"
+        return tmp;
+    }
+
+    function replace (data) {
+        var tmp = this._object;
+
+        if (Object.isString(data)) {
+            this._object = miniLOL.JSON.unserialize(data);
+        }
+        else {
+            this._object = Object.extend({}, data);
+        }
+
+        return tmp;
+    }
+
+    var _toJSON = Hash.prototype.toJSON
+
+    function toJSON (improved) {
+        if (improved) {
+            return miniLOL.JSON.serialize(this._object) || '{}';
+        }
+        else {
+            return _toJSON.call(this);
+        }
+    }
+
+    return {
+        remove: Hash.prototype.unset,
+
+        clear:   clear,
+        replace: replace,
+        
+        toJSON: toJSON
+    };
+})());

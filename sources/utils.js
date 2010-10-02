@@ -16,8 +16,8 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-miniLOL.utils = {
-    exists: function (path) {
+miniLOL.utils = (function () {
+    function exists (path) {
         var result = false;
 
         new Ajax.Request(path, {
@@ -30,9 +30,25 @@ miniLOL.utils = {
         });
 
         return result;
-    },
+    }
 
-    execute: function (path) {
+    function get (path, minified) {
+        var result;
+
+        new Ajax.Request(path, {
+            method:       'get',
+            minified:     minified,
+            asynchronous: false,
+
+            onSuccess: function (http) {
+                result = http.responseText;
+            }
+        });
+
+        return result;
+    }
+
+    function execute (path) {
         var result;
         var error;
 
@@ -69,9 +85,9 @@ miniLOL.utils = {
         }
 
         return result;
-    },
+    }
 
-    include: function (path) {
+    function include (path) {
         var result = false;
 
         new Ajax.Request(path, {
@@ -90,9 +106,9 @@ miniLOL.utils = {
         });
 
         return result;
-    },
+    }
 
-    require: function (path) {
+    function require (path) {
         var error = false;
 
         new Ajax.Request(path, {
@@ -133,4 +149,13 @@ miniLOL.utils = {
 
         return true;
     }
-};
+
+    return {
+        exists: exists,
+        get:    get,
+
+        execute: execute,
+        include: include,
+        require: require
+    };
+})();

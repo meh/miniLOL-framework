@@ -31,11 +31,13 @@ miniLOL.Storage = Class.create({
     initialize: function (name, backend) {
         this.name = name;
         
-        this.backend = (miniLOL.Storage.Instances[name])
-            ? miniLOL.Storage.Instances[name]
-            : new (backend || miniLOL.Storage.Backends.available())(name);
-
-        miniLOL.Storage.Instances[name] = this.backend;
+        if (miniLOL.Storage.Instances[name]) {
+            this.backend = miniLOL.Storage.Instances[name];
+        }
+        else {
+            this.backend = miniLOL.Storage.Instances[name] =
+                new (backend || miniLOL.Storage.Backends.available())(name);
+        }
     },
 
     get: function (key) {
@@ -65,9 +67,9 @@ miniLOL.Storage = Class.create({
 
 miniLOL.Storage.Instances = {};
 
-miniLOL.Storage.Backend = Class.create(miniLOL.JSON, {
+miniLOL.Storage.Backend = Class.create(Hash, {
     initialize: function ($super, name, data) {
-        $super(data);
+        $super(((Object.isString(data)) ? miniLOL.JSON.unserialize(data) : data) || {});
 
         this.name = miniLOL.Storage.Backend.filter(name);
 
@@ -157,7 +159,7 @@ miniLOL.Storage.Backends = {
         },
 
         save: function () {
-            var raw = this.toString();
+            var raw = this.toJSON(true);
 
             this.size = raw.length;
 
@@ -173,7 +175,7 @@ miniLOL.Storage.Backends = {
         },
 
         save: function () {
-            var raw = this.toString();
+            var raw = this.toJSON(true);
 
             this.size = raw.length;
 
@@ -196,7 +198,7 @@ miniLOL.Storage.Backends = {
         },
 
         save: function () {
-            var raw = this.toString();
+            var raw = this.toJSON(true);
 
             this.size = raw.length;
 
@@ -213,7 +215,7 @@ miniLOL.Storage.Backends = {
         },
 
         save: function () {
-            var raw = this.toString();
+            var raw = this.toJSON(true);
 
             this.size = raw.length;
 
