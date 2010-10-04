@@ -1363,7 +1363,7 @@ Object.extend(Date.prototype, (function () {
  ****************************************************************************/
 
 
-window.Element.addMethods((function () {
+Element.addMethods((function () {
     function load (path, options) {
         if (options && !Object.isUndefined(options.frequency)) {
             new Ajax.PeriodicalUpdater(this, path, options);
