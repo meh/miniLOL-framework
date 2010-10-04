@@ -27,10 +27,46 @@
 Date.weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 Date.months   = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+var _width = {
+    'd': 2,
+    'H': 2,
+    'I': 2,
+    'j': 3,
+    'k': 2,
+    'l': 2,
+    'm': 2,
+    'M': 2,
+    'N': 9,
+    'S': 2,
+    'U': 2,
+    'V': 2,
+    'W': 2,
+    'y': 2,
+
+    'i': 3
+};
+
 var _parse = {
     '%': /(%)/,
     'd': /(\d\d)/
-}
+};
+
+Object.extend(Date, (function () {
+    var _parse = Date.parse
+
+    /**
+     *  Date.parse(string[, date]) -> Date
+    **/
+    function parse (format, string) {
+        if (!format.include('%')) {
+            return _parse(format);
+        }
+    }
+
+    return {
+        parse: parse
+    };
+})());
 
 var _format = {
     flag: {
@@ -53,25 +89,6 @@ var _format = {
         '#': function (value, width) {
             return value.toString().toInvertedCase().toPaddedString(width, ' ');
         }
-    },
-
-    width: {
-        'd': 2,
-        'H': 2,
-        'I': 2,
-        'j': 3,
-        'k': 2,
-        'l': 2,
-        'm': 2,
-        'M': 2,
-        'N': 9,
-        'S': 2,
-        'U': 2,
-        'V': 2,
-        'W': 2,
-        'y': 2,
-
-        'i': 3
     },
 
     // a literal %
@@ -322,23 +339,6 @@ var _format = {
     }
 };
 
-Object.extend(Date, (function () {
-    var _parse = Date.parse
-
-    /**
-     *  Date.parse(string[, date]) -> Date
-    **/
-    function parse (format, string) {
-        if (!format.include('%')) {
-            return _parse(format);
-        }
-    }
-
-    return {
-        parse: parse
-    };
-})());
-
 Object.extend(Date.prototype, (function () {
     /**
      *  Date#format(format) -> String
@@ -455,13 +455,18 @@ Object.extend(Date.prototype, (function () {
      *  then an optional modifier, which is either E to use the locale's alter‐
      *  nate  representations  if available, or O to use the locale's alternate
      *  numeric symbols if available.
+     *
+     *  ##### Examples
+     *      
+     *      new Date().format('%d%o day of %B')
+     *      // -> "4th day of October"
     **/
     function format (format) {
         var date = this;
 
         return format.gsub(/%([\-_0^#])?(\d+)?(.)/, function (match) {
             var flag  = match[1] || '0';
-            var width = parseInt(match[2] || _format.width[type] || '0');
+            var width = parseInt(match[2] || _width[type] || '0');
             var type  = match[3];
 
             if (!_format[type]) {

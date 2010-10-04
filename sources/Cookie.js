@@ -166,12 +166,29 @@ miniLOL.Cookie = (function () {
         });
     }
 
-    return {
+    // Enumerable implementation
+    function _each (iterator) {
+        keys().each(function (key) {
+            var value = get(key);
+            var pair  = [key, value];
+
+            pair.name  = key;
+            pair.key   = key;
+            pair.value = value;
+
+            iterator(pair);
+        });
+    }
+
+    return Object.extend(Enumerable, {
+        _each: _each,
+
         encode: encode,
         keys:   keys,
         get:    get,
         set:    set,
         remove: remove,
+        unset:  remove,
         clear:  clear
-    };
+    });
 })();

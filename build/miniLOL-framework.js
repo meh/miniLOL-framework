@@ -1057,10 +1057,43 @@ Hash.addMethods((function () {
 Date.weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 Date.months   = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+var _width = {
+    'd': 2,
+    'H': 2,
+    'I': 2,
+    'j': 3,
+    'k': 2,
+    'l': 2,
+    'm': 2,
+    'M': 2,
+    'N': 9,
+    'S': 2,
+    'U': 2,
+    'V': 2,
+    'W': 2,
+    'y': 2,
+
+    'i': 3
+};
+
 var _parse = {
     '%': /(%)/,
     'd': /(\d\d)/
-}
+};
+
+Object.extend(Date, (function () {
+    var _parse = Date.parse
+
+    function parse (format, string) {
+        if (!format.include('%')) {
+            return _parse(format);
+        }
+    }
+
+    return {
+        parse: parse
+    };
+})());
 
 var _format = {
     flag: {
@@ -1083,25 +1116,6 @@ var _format = {
         '#': function (value, width) {
             return value.toString().toInvertedCase().toPaddedString(width, ' ');
         }
-    },
-
-    width: {
-        'd': 2,
-        'H': 2,
-        'I': 2,
-        'j': 3,
-        'k': 2,
-        'l': 2,
-        'm': 2,
-        'M': 2,
-        'N': 9,
-        'S': 2,
-        'U': 2,
-        'V': 2,
-        'W': 2,
-        'y': 2,
-
-        'i': 3
     },
 
     '%': function (date) {
@@ -1307,27 +1321,13 @@ var _format = {
     }
 };
 
-Object.extend(Date, (function () {
-    var _parse = Date.parse
-
-    function parse (format, string) {
-        if (!format.include('%')) {
-            return _parse(format);
-        }
-    }
-
-    return {
-        parse: parse
-    };
-})());
-
 Object.extend(Date.prototype, (function () {
     function format (format) {
         var date = this;
 
         return format.gsub(/%([\-_0^#])?(\d+)?(.)/, function (match) {
             var flag  = match[1] || '0';
-            var width = parseInt(match[2] || _format.width[type] || '0');
+            var width = parseInt(match[2] || _width[type] || '0');
             var type  = match[3];
 
             if (!_format[type]) {
@@ -2337,14 +2337,30 @@ miniLOL.Cookie = (function () {
         });
     }
 
-    return {
+    function _each (iterator) {
+        keys().each(function (key) {
+            var value = get(key);
+            var pair  = [key, value];
+
+            pair.name  = key;
+            pair.key   = key;
+            pair.value = value;
+
+            iterator(pair);
+        });
+    }
+
+    return Object.extend(Enumerable, {
+        _each: _each,
+
         encode: encode,
         keys:   keys,
         get:    get,
         set:    set,
         remove: remove,
+        unset:  remove,
         clear:  clear
-    };
+    });
 })();
 /* Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org]
  *

@@ -21,8 +21,8 @@ Object.extend(RegExp, {
 });
 
 Object.extend(RegExp.prototype, (function () {
-    function match (str) {
-        return str.match(this);
+    function match (string) {
+        return string.match(this);
     }
 
     return {
