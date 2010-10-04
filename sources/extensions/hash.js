@@ -16,6 +16,11 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
+/** section: Extensions
+ *  class Hash
+ *
+ *  Extensions to the Prototype Hash object.
+**/
 Hash.addMethods((function () {
     function clear () {
         var tmp      = this._object;

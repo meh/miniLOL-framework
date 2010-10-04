@@ -247,19 +247,49 @@ Object.extend(String.prototype, (function () {
 
     function toNumber (integer) {
         return (integer) ? parseInt(this) : parseFloat(this);
-    };
+    }
 
     function toBase (base) {
         return this.toNumber().toBase(base);
-    };
+    }
 
     function fromBase (base) {
         return parseInt(this, base);
-    };
+    }
 
     function toCode () {
         return this.charCodeAt(0);
-    };
+    }
+
+    function toPaddedString (length, pad, pad2) {
+        var pad = (Object.isUndefined(pad2 || pad)) ? '0' : (pad2 || pad).toString();
+
+        return pad.times(length - this.length) + this;
+    }
+
+    function toInvertedCase () {
+        var result = '';
+
+        for (var i = 0, length = this.length; i < length; i++) {
+            var chr  = this.charAt(i);
+            var down = chr.toLowerCase();
+            var up   = chr.toUpperCase();
+
+            if (up == down) {
+                result += down;
+            }
+            else {
+                if (chr == down) {
+                    result += up;
+                }
+                else {
+                    result += down;
+                }
+            }
+        }
+
+        return result;
+    }
 
     var _encodeURI          = window.encodeURI;
     var _decodeURI          = window.decodeURI;
@@ -301,10 +331,12 @@ Object.extend(String.prototype, (function () {
         reverse:     reverse,
         translate:   translate,
 
-        toNumber: toNumber,
-        toBase:   toBase,
-        fromBase: fromBase,
-        toCode:   toCode,
+        toNumber:       toNumber,
+        toBase:         toBase,
+        fromBase:       fromBase,
+        toCode:         toCode,
+        toPaddedString: toPaddedString,
+        toInvertedCase: toInvertedCase,
 
         encodeURI:          encodeURI,
         decodeURI:          decodeURI,

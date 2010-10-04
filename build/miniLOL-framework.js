@@ -684,19 +684,49 @@ Object.extend(String.prototype, (function () {
 
     function toNumber (integer) {
         return (integer) ? parseInt(this) : parseFloat(this);
-    };
+    }
 
     function toBase (base) {
         return this.toNumber().toBase(base);
-    };
+    }
 
     function fromBase (base) {
         return parseInt(this, base);
-    };
+    }
 
     function toCode () {
         return this.charCodeAt(0);
-    };
+    }
+
+    function toPaddedString (length, pad, pad2) {
+        var pad = (Object.isUndefined(pad2 || pad)) ? '0' : (pad2 || pad).toString();
+
+        return pad.times(length - this.length) + this;
+    }
+
+    function toInvertedCase () {
+        var result = '';
+
+        for (var i = 0, length = this.length; i < length; i++) {
+            var chr  = this.charAt(i);
+            var down = chr.toLowerCase();
+            var up   = chr.toUpperCase();
+
+            if (up == down) {
+                result += down;
+            }
+            else {
+                if (chr == down) {
+                    result += up;
+                }
+                else {
+                    result += down;
+                }
+            }
+        }
+
+        return result;
+    }
 
     var _encodeURI          = window.encodeURI;
     var _decodeURI          = window.decodeURI;
@@ -738,10 +768,12 @@ Object.extend(String.prototype, (function () {
         reverse:     reverse,
         translate:   translate,
 
-        toNumber: toNumber,
-        toBase:   toBase,
-        fromBase: fromBase,
-        toCode:   toCode,
+        toNumber:       toNumber,
+        toBase:         toBase,
+        fromBase:       fromBase,
+        toCode:         toCode,
+        toPaddedString: toPaddedString,
+        toInvertedCase: toInvertedCase,
 
         encodeURI:          encodeURI,
         decodeURI:          decodeURI,
@@ -1031,6 +1063,47 @@ var _parse = {
 }
 
 var _format = {
+    flag: {
+        '-': function (value, width) {
+            return value;
+        },
+
+        '_': function (value, width) {
+            return value.toPaddedString(width, 10, ' ');
+        },
+
+        '0': function (value, width) {
+            return value.toPaddedString(width, 10, '0');
+        },
+
+        '^': function (value, width) {
+            return value.toString().toUpperCase().toPaddedString(width, ' ')
+        },
+
+        '#': function (value, width) {
+            return value.toString().toInvertedCase().toPaddedString(width, ' ');
+        }
+    },
+
+    width: {
+        'd': 2,
+        'H': 2,
+        'I': 2,
+        'j': 3,
+        'k': 2,
+        'l': 2,
+        'm': 2,
+        'M': 2,
+        'N': 9,
+        'S': 2,
+        'U': 2,
+        'V': 2,
+        'W': 2,
+        'y': 2,
+
+        'i': 3
+    },
+
     '%': function (date) {
         return '%';
     },
@@ -1056,38 +1129,48 @@ var _format = {
     },
 
     'C': function (date) {
-        return date.getFullYear().substr(0, 2);
+        return date.getFullYear().toString().substr(0, 2);
     },
 
     'd': function (date) {
-        return date.getDate().toPaddedString(2);
+        return date.getDate();
     },
 
     'D': function (date) {
         return date.format('%m/%d/%y');
     },
 
-    'd': function (date) {
-        return (date.getMonth() + 1).toPaddedString(2);
+    'e': function (date) {
+        return date.format('%_d');
+    },
+
+    'F': function (date) {
+        return date.format('%Y-%m-%d');
+    },
+
+    'g': function (date) {
+        return date.format('%y');
+    },
+
+    'G': function (date) {
+        return date.format('%Y');
+    },
+
+    'h': function (date) {
+        return date.format('%b');
+    },
+
+    'H': function (date) {
+        return date.getHours();
+    },
+
+    'I': function (date) {
+        var hours = date.getHours();
+
+        return ((hours + 1 > 12) ? (hours + 1) / 2 : hours + 1);
     },
 
     'j': function (date) {
-        return date.getDate();
-    },
-
-    'N': function (date) {
-        return (date.getDay() == 0) ? 7 : date.getDay();
-    },
-
-    'S': function (date) {
-        return date.getDate().ordinalized();
-    },
-
-    'w': function (date) {
-        return date.getDay();
-    },
-
-    'z': function (date) {
         var tmp = new Date();
         tmp.setFullYear(date.getFullYear());
         tmp.setDate(1);
@@ -1096,7 +1179,67 @@ var _format = {
         return ((date.getTime() - tmp.getTime()) / 1000 / 60 / 60 / 24).ceil();
     },
 
-    'W': function (date) {
+    'k': function (date) {
+        return date.format('%_H');
+    },
+
+    'l': function (date) {
+        return date.format('%_l');
+    },
+
+    'm': function (date) {
+        return (date.getMonth() + 1);
+    },
+
+    'M': function (date) {
+        return date.getMinutes();
+    },
+
+    'n': function (date) {
+        return "\n";
+    },
+
+    'N': function (date) {
+        return date.getMilliseconds() * 1000000;
+    },
+
+    'p': function (date) {
+        return (date.getHours() > 12) ? 'PM' : 'AM';
+    },
+
+    'P': function (date) {
+        return date.format('%#p');
+    },
+
+    'r': function (date) {
+        return date.format('%I:%M:%S %p');
+    },
+
+    'R': function (date) {
+        return date.format('%H:%M');
+    },
+
+    's': function (date) {
+        return date.getDate();
+    },
+
+    'S': function (date) {
+        return date.getSeconds();
+    },
+
+    't': function (date) {
+        return "\t";
+    },
+
+    'T': function (date) {
+        return date.format('%H:%M:%S');
+    },
+
+    'u': function (date) {
+        return (date.getDay() == 0) ? 7 : date.getDay();
+    },
+
+    'U': function (date) {
         var tmp = new Date();
         tmp.setFullYear(date.getFullYear());
         tmp.setDate(1);
@@ -1105,11 +1248,36 @@ var _format = {
         return ((date.getTime() - tmp.getTime()) / 1000 / 60 / 60 / 24 / 7).ceil();
     },
 
-    'n': function (date) {
-        return date.getMonth() + 1;
+    'V': function (date) {
+        return date.format('%U');
     },
 
-    't': function (date) {
+    'w': function (date) {
+        return date.getDay();
+    },
+
+    'W': function (date) {
+        return date.format('%U');
+    },
+
+    'x': function (date) {
+        return date.format('%m/%d/%y');
+    },
+
+    'X': function (date) {
+        return date.format('%T');
+    },
+
+    'y': function (date) {
+        return date.getFullYear().toString().substr(2, 2)
+    },
+
+    'Y': function (date) {
+        return date.getFullYear();
+    },
+
+
+    'E': function (date) {
         if (date.getMonth() % 2 == 0) {
             return 31;
         }
@@ -1121,73 +1289,21 @@ var _format = {
         return 30;
     },
 
-    'L': function (date) {
+    'o': function (date) {
+        return date.getDate().ordinalized();
+    },
+
+    'O': function (date) {
         return (date.getFullYear() % 4) ? 0 : 1;
     },
 
-    'o': function (date) {
-        return date.getFullYear();
-    },
-
-    'Y': function (date) {
-        return date.getFullYear();
-    },
-
-    'y': function (date) {
-        return date.getFullYear().toString().substr(2, 2);
-    },
-
-    'a': function (date) {
-        return (date.getHours() > 12) ? 'pm' : 'am';
-    },
-
-    'A': function (date) {
-        return (date.getHours() > 12) ? 'PM' : 'AM';
-    },
-
-    'B': function (date) {
+    'i': function (date) {
         var tmp = new Date(date);
         tmp.setHours(0);
         tmp.setSeconds(0);
         tmp.setMinutes(0);
 
         return ((date.getTime() - tmp.getTime()) / 1000 / 86.4).toFixed(2);
-    },
-
-    'g': function (date) {
-        return (date.getHours() + 1 > 12) ? (date.getHours() + 1) / 2 : date.getHours() + 1;
-    },
-
-    'g': function (date) {
-        return date.getHours();
-    },
-
-    'h': function (date) {
-        return ((date.getHours() + 1 > 12) ? (date.getHours() + 1) / 2 : date.getHours() + 1).toPaddedString(2);
-    },
-
-    'H': function (date) {
-        return date.getHours().toPaddedString(2);
-    },
-
-    'i': function (date) {
-        return date.getMinutes().toPaddedString(2);
-    },
-
-    's': function (date) {
-        return date.getSeconds().toPaddedString(2);
-    },
-
-    'u': function (date) {
-        return date.getMilliseconds() * 1000;
-    },
-
-    'r': function (date) {
-        return date.toUTCString();
-    },
-
-    'U': function (date) {
-        return date.getTime();
     }
 };
 
@@ -1209,8 +1325,16 @@ Object.extend(Date.prototype, (function () {
     function format (format) {
         var date = this;
 
-        return format.gsub(/%([\-_0^#])?(.)/, function (match) {
-            return (_format[match[1]]) ? _format[match[1]](date) : match[1];
+        return format.gsub(/%([\-_0^#])?(\d+)?(.)/, function (match) {
+            var flag  = match[1] || '0';
+            var width = parseInt(match[2] || _format.width[type] || '0');
+            var type  = match[3];
+
+            if (!_format[type]) {
+                return match[0];
+            }
+
+            return _format.flag[flag](_format[type](date), width);
         });
     }
 
