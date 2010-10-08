@@ -17,52 +17,53 @@
  ****************************************************************************/
 
 miniLOL.JSON = (function () {
-    function parse (raw) {
-        return new miniLOL.JSON(raw);
+    function convert (data) {
+        if (Object.isObject(data)) {
+            if (data.__miniLOL_is_xml) {
+                return data.value.toXML();
+            }
+            else if (data.__miniLOL_is_function) {
+                return Function.parse(data.value);
+            }
+            else {
+                return miniLOL.JSON.unserializeSpecial(data);
+            }
+        }
+        else {
+            if (Object.isXML(data)) {
+                return { __miniLOL_is_xml: true, value: String.fromXML(data) };
+            }
+            else if (Object.isFunction(data)) {
+                return { __miniLOL_is_function: true, value: data.toString() };
+            }
+            else {
+                return miniLOL.JSON.serializeSpecial(data);
+            }
+        }
     }
 
-    function serializeSpecial (obj) {
-        if (typeof obj !== 'object') {
-            return obj;
-        }
-    
-        obj = Object.clone(obj);
-    
-        for (var key in obj) {
-            if (Object.isXML(obj[key])) {
-                obj[key] = { __miniLOL_is_xml: true, value: String.fromXML(obj[key]) };
-            }
-            else if (Object.isFunction(obj[key])) {
-                obj[key] = { __miniLOL_is_function: true, value: obj[key].toString() };
-            }
-            else {
-                obj[key] = miniLOL.JSON.serializeSpecial(obj[key]);
+    function special (obj) {
+        var result;
+
+        if (Object.isObject(obj)) {
+            result = Object.clone(obj);
+
+            for (var key in obj) {
+                result[key] = convert(obj[key]);
             }
         }
-    
-        return obj;
-    }
-    
-    function unserializeSpecial (obj) {
-        if (typeof obj !== 'object') {
-            return obj;
+        else if (Object.isArray(obj)) {
+            result = [];
+
+            obj.each(function (data) {
+                result.push(convert(data));
+            });
         }
-        
-        obj = Object.clone(obj);
-    
-        for (var key in obj) {
-            if (obj[key].__miniLOL_is_xml) {
-                obj[key] = obj[key].value.toXML();
-            }
-            else if (obj[key].__miniLOL_is_function) {
-                obj[key] = Function.parse(obj[key].value);
-            }
-            else {
-                obj[key] = miniLOL.JSON.unserializeSpecial(obj[key]);
-            }
+        else {
+            result = obj;
         }
     
-        return obj;
+        return result;
     }
     
     function serialize (obj) {
@@ -88,12 +89,13 @@ miniLOL.JSON = (function () {
     }
 
     return {
-        parse: parse,
-
-        serializeSpecial:   serializeSpecial,
-        unserializeSpecial: unserializeSpecial,
+        special:            special,
+        serializeSpecial:   special,
+        unserializeSpecial: special,
 
         serialize:   serialize,
-        unserialize: unserialize
+        unserialize: unserialize,
+
+        convert: convert
     };
 })();

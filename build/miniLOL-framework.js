@@ -249,7 +249,7 @@ Object.extend(Function.prototype, (function () {
 
 Object.extend(Object, (function () {
     function isObject (val) {
-        return typeof val == 'object';
+        return typeof val == 'object' && val.constructor === Object;
     }
 
     function isBoolean (val) {
@@ -1525,6 +1525,94 @@ Element.addMethods((function () {
         toObject:           toObject
     };
 })());
+/*  Prototype JavaScript framework, version 1.7_rc2
+ *  (c) 2005-2010 Sam Stephenson
+ *
+ *  Prototype is freely distributable under the terms of an MIT-style license.
+ *  For details, see the Prototype web site: http://www.prototypejs.org/
+ *
+ *--------------------------------------------------------------------------*/
+
+/*
+ * Little modifications by meh. [http://meh.doesntexist.org | meh@paranoici.org]
+ * to adapt the code to miniLOL.
+ */
+
+Ajax.Request.addMethods({
+    request: function (url) {
+        this.url    = url;
+        this.method = this.options.method;
+
+        if (Object.isString(this.options.parameters)) {
+            this.options.parameters = this.options.parameters.toQueryParams();
+        }
+
+        if (this.options.minified) {
+            var minified = this.url.replace(/\.([^.]+)$/, '.min.$1');
+
+            if (miniLOL.utils.exists(minified)) {
+                this.url = minified;
+            }
+        }
+
+        if (this.options.cached === false) {
+            this.url += ((this.url.include('?')) ? '&' : '?') + Math.random();
+
+            this.options.requestHeaders = Object.extend(this.options.requestHeaders || {}, {
+                'Cache-Control': 'must-revalidate',
+                'Pragma':        'no-cache'
+            });
+        }
+
+        var params = Object.toQueryString(this.options.parameters);
+
+        if (!['get', 'post', 'head'].include(this.method)) {
+            params      += (params ? '&' : '') + '_method=' + this.method;
+            this.method  = 'post';
+        }
+
+        if (params) {
+            if (this.method == 'get' || this.method == 'head') {
+                this.url += (this.url.include('?') ? '&' : '?') + params;
+            }
+            else if (/Konqueror|Safari|KHTML/.test(navigator.userAgent)) {
+                params += '&_=';
+            }
+        }
+
+        this.parameters = params.toQueryParams();
+
+        try {
+            var response = new Ajax.Response(this);
+
+            if (this.options.onCreate) {
+                this.options.onCreate(response);
+            }
+
+            Ajax.Responders.dispatch('onCreate', this, response);
+
+            this.transport.open(this.method.toUpperCase(), this.url, this.options.asynchronous);
+
+            if (this.options.asynchronous) {
+                this.respondToReadyState.bind(this).defer(1);
+            }
+
+            this.transport.onreadystatechange = this.onStateChange.bind(this);
+            this.setRequestHeaders();
+
+            this.body = this.method == 'post' ? (this.options.postBody || params) : null;
+            this.transport.send(this.body);
+
+            /* Force Firefox to handle ready state 4 for synchronous requests */
+            if (!this.options.asynchronous && this.transport.overrideMimeType) {
+                this.onStateChange();
+            }
+        }
+        catch (e) {
+            this.dispatchException(e);
+        }
+    }
+});
 
 
 if (!Object.isObject(window.miniLOL)) {
@@ -1716,27 +1804,26 @@ miniLOL.utils = (function () {
         return result;
     }
 
-    function get (path, minified) {
+    function get (path, options) {
         var result;
 
-        new Ajax.Request(path, {
+        new Ajax.Request(path, Object.extend(options || {}, {
             method:       'get',
-            minified:     minified,
             asynchronous: false,
 
             onSuccess: function (http) {
                 result = http.responseText;
             }
-        });
+        }));
 
         return result;
     }
 
-    function execute (path) {
+    function execute (path, options) {
         var result;
         var error;
 
-        new Ajax.Request(path, {
+        new Ajax.Request(path, Object.extend(options || {}, {
             method: 'get',
             asynchronous: false,
             evalJS: false,
@@ -1762,7 +1849,7 @@ miniLOL.utils = (function () {
                 error.fileName   = path;
                 error.lineNumber = 0;
             }
-        });
+        }));
 
         if (error) {
             throw error;
@@ -1771,10 +1858,10 @@ miniLOL.utils = (function () {
         return result;
     }
 
-    function include (path) {
+    function include (path, options) {
         var result = false;
 
-        new Ajax.Request(path, {
+        new Ajax.Request(path, Object.extend(options || {}, {
             method: 'get',
             asynchronous: false,
             evalJS: false,
@@ -1787,15 +1874,15 @@ miniLOL.utils = (function () {
                     result = false;
                 }
             }
-        });
+        }));
 
         return result;
     }
 
-    function require (path) {
+    function require (path, options) {
         var error = false;
 
-        new Ajax.Request(path, {
+        new Ajax.Request(path, Object.extend(options || {}, {
             method: 'get',
             asynchronous: false,
             evalJS: false,
@@ -1825,7 +1912,7 @@ miniLOL.utils = (function () {
                     text:   http.statusText
                 };
             }
-        });
+        }));
 
         if (error) {
             throw error;
@@ -2152,52 +2239,53 @@ miniLOL.Resource = Class.create({
  ****************************************************************************/
 
 miniLOL.JSON = (function () {
-    function parse (raw) {
-        return new miniLOL.JSON(raw);
-    }
-
-    function serializeSpecial (obj) {
-        if (typeof obj !== 'object') {
-            return obj;
-        }
-
-        obj = Object.clone(obj);
-
-        for (var key in obj) {
-            if (Object.isXML(obj[key])) {
-                obj[key] = { __miniLOL_is_xml: true, value: String.fromXML(obj[key]) };
+    function convert (data) {
+        if (Object.isObject(data)) {
+            if (data.__miniLOL_is_xml) {
+                return data.value.toXML();
             }
-            else if (Object.isFunction(obj[key])) {
-                obj[key] = { __miniLOL_is_function: true, value: obj[key].toString() };
+            else if (data.__miniLOL_is_function) {
+                return Function.parse(data.value);
             }
             else {
-                obj[key] = miniLOL.JSON.serializeSpecial(obj[key]);
+                return miniLOL.JSON.unserializeSpecial(data);
             }
         }
-
-        return obj;
-    }
-
-    function unserializeSpecial (obj) {
-        if (typeof obj !== 'object') {
-            return obj;
-        }
-
-        obj = Object.clone(obj);
-
-        for (var key in obj) {
-            if (obj[key].__miniLOL_is_xml) {
-                obj[key] = obj[key].value.toXML();
+        else {
+            if (Object.isXML(data)) {
+                return { __miniLOL_is_xml: true, value: String.fromXML(data) };
             }
-            else if (obj[key].__miniLOL_is_function) {
-                obj[key] = Function.parse(obj[key].value);
+            else if (Object.isFunction(data)) {
+                return { __miniLOL_is_function: true, value: data.toString() };
             }
             else {
-                obj[key] = miniLOL.JSON.unserializeSpecial(obj[key]);
+                return miniLOL.JSON.serializeSpecial(data);
             }
         }
+    }
 
-        return obj;
+    function special (obj) {
+        var result;
+
+        if (Object.isObject(obj)) {
+            result = Object.clone(obj);
+
+            for (var key in obj) {
+                result[key] = convert(obj[key]);
+            }
+        }
+        else if (Object.isArray(obj)) {
+            result = [];
+
+            obj.each(function (data) {
+                result.push(convert(data));
+            });
+        }
+        else {
+            result = obj;
+        }
+
+        return result;
     }
 
     function serialize (obj) {
@@ -2223,13 +2311,14 @@ miniLOL.JSON = (function () {
     }
 
     return {
-        parse: parse,
-
-        serializeSpecial:   serializeSpecial,
-        unserializeSpecial: unserializeSpecial,
+        special:            special,
+        serializeSpecial:   special,
+        unserializeSpecial: special,
 
         serialize:   serialize,
-        unserialize: unserialize
+        unserialize: unserialize,
+
+        convert: convert
     };
 })();
 /* Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org]

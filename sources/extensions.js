@@ -29,3 +29,4 @@
 //= require "extensions/hash"
 //= require "extensions/date"
 //= require "extensions/element"
+//= require "extensions/ajax"

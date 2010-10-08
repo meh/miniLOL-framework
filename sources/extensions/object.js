@@ -26,7 +26,7 @@
 
 Object.extend(Object, (function () {
     function isObject (val) {
-        return typeof val == 'object';
+        return typeof val == 'object' && val.constructor === Object;
     }
 
     function isBoolean (val) {

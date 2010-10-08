@@ -32,27 +32,26 @@ miniLOL.utils = (function () {
         return result;
     }
 
-    function get (path, minified) {
+    function get (path, options) {
         var result;
 
-        new Ajax.Request(path, {
+        new Ajax.Request(path, Object.extend(options || {}, {
             method:       'get',
-            minified:     minified,
             asynchronous: false,
 
             onSuccess: function (http) {
                 result = http.responseText;
             }
-        });
+        }));
 
         return result;
     }
 
-    function execute (path) {
+    function execute (path, options) {
         var result;
         var error;
 
-        new Ajax.Request(path, {
+        new Ajax.Request(path, Object.extend(options || {}, {
             method: 'get',
             asynchronous: false,
             evalJS: false,
@@ -78,7 +77,7 @@ miniLOL.utils = (function () {
                 error.fileName   = path;
                 error.lineNumber = 0;
             }
-        });
+        }));
 
         if (error) {
             throw error;
@@ -87,10 +86,10 @@ miniLOL.utils = (function () {
         return result;
     }
 
-    function include (path) {
+    function include (path, options) {
         var result = false;
 
-        new Ajax.Request(path, {
+        new Ajax.Request(path, Object.extend(options || {}, {
             method: 'get',
             asynchronous: false,
             evalJS: false,
@@ -103,15 +102,15 @@ miniLOL.utils = (function () {
                     result = false;
                 }
             }
-        });
+        }));
 
         return result;
     }
 
-    function require (path) {
+    function require (path, options) {
         var error = false;
 
-        new Ajax.Request(path, {
+        new Ajax.Request(path, Object.extend(options || {}, {
             method: 'get',
             asynchronous: false,
             evalJS: false,
@@ -141,7 +140,7 @@ miniLOL.utils = (function () {
                     text:   http.statusText
                 };
             }
-        });
+        }));
 
         if (error) {
             throw error;

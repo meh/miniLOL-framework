@@ -21,11 +21,20 @@ Ajax.Request.addMethods({
         }
 
         if (this.options.minified) {
-            var minified = this.url.replace(/\.([^.]*?)$/, '.min.\1');
+            var minified = this.url.replace(/\.([^.]+)$/, '.min.$1');
 
             if (miniLOL.utils.exists(minified)) {
                 this.url = minified;
             }
+        }
+
+        if (this.options.cached === false) {
+            this.url += ((this.url.include('?')) ? '&' : '?') + Math.random();
+
+            this.options.requestHeaders = Object.extend(this.options.requestHeaders || {}, {
+                'Cache-Control': 'must-revalidate',
+                'Pragma':        'no-cache'
+            });
         }
 
         var params = Object.toQueryString(this.options.parameters);
