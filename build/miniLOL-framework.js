@@ -248,6 +248,10 @@ Object.extend(Function.prototype, (function () {
 
 
 Object.extend(Object, (function () {
+    function is (klass, val) {
+        return val && (val.constructor == klass || val == klass);
+    }
+
     function isObject (val) {
         return typeof val == 'object' && val.constructor === Object;
     }
@@ -460,6 +464,7 @@ Object.extend(Object, (function () {
     }
 
     return {
+        is:         is,
         isObject:   isObject,
         isBoolean:  isBoolean,
         isRegExp:   isRegExp,
