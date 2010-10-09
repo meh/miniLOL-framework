@@ -21,7 +21,7 @@ miniLOL.utils = (function () {
         var result = false;
 
         new Ajax.Request(path, {
-            method: 'head',
+            method:       'head',
             asynchronous: false,
 
             onSuccess: function () {
@@ -38,9 +38,15 @@ miniLOL.utils = (function () {
         new Ajax.Request(path, Object.extend(options || {}, {
             method:       'get',
             asynchronous: false,
+            evalJS:       false,
 
             onSuccess: function (http) {
-                result = http.responseText;
+                if (http.request.options.raw) {
+                    result = http.responseText;
+                }
+                else {
+                    result = http.responseXML || http.responseText;
+                }
             }
         }));
 
@@ -52,9 +58,9 @@ miniLOL.utils = (function () {
         var error;
 
         new Ajax.Request(path, Object.extend(options || {}, {
-            method: 'get',
+            method:       'get',
             asynchronous: false,
-            evalJS: false,
+            evalJS:       false,
 
             onSuccess: function (http) {
                 try {

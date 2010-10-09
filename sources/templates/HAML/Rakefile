@@ -1,0 +1,68 @@
+require 'rake'
+require 'rake/clean'
+require 'sprockets'
+
+# You need this: http://code.google.com/closure/compiler/
+# I suggest using 20100616 version, because later versions break prototype.js on IE6
+COMPILER = 'closure-compiler' # --compilation_level ADVANCED_OPTIMIZATIONS'
+
+CLEAN.include('HAML.min.js')
+
+VERSION = '0.1'
+
+def minify (file, out=nil)
+    if !File.exists?(file)
+        return false
+    end
+
+    if !out
+        out = file.clone;
+        out[out.length - 3, 3] = '.min.js'
+    end
+
+    if !File.exists?(out) || File.mtime(file) > File.mtime(out)
+        result = `#{COMPILER} --js '#{file}' --js_output_file '#{out}'`
+
+        if $? != 0
+            File.delete(out) rescue nil
+
+            return false
+        end
+    else
+        return 1
+    end
+
+    return true
+end
+
+def miniHeader (file)
+    content = File.read(file)
+
+    file = File.new(file, 'w');
+    file.write content
+    file.close
+end
+
+task :default do
+    updated = false
+
+    if !File.exists?('../HAML.min.js')
+        updated = true
+    else
+        ['main', 'haml'].each {|file|
+            if File.mtime("#{file}.js") >= File.mtime('HAML.min.js')
+                updated = true
+                break
+            end
+        }
+    end
+
+    if updated
+        minified = File.new(`mktemp -u`.strip, 'w')
+        minified.write(File.read('main.js') + File.read('haml.js'))
+        minified.close
+
+        minify(minified.path, 'HAML.min.js') || exit
+        miniHeader('HAML.min.js')
+    end
+end

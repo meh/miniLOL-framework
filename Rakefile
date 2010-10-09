@@ -68,7 +68,7 @@ module Helper
     end
 end
 
-task :default => [:framework, :minify]
+task :default => [:framework, :minify, :template]
 
 task :framework do
     updated = false
@@ -77,6 +77,7 @@ task :framework do
         updated = true
     else
         files = FileList['sources/**/*.js']
+        files.exclude('source/template')
         
         files.each {|file|
             if File.mtime("#{file}") >= File.mtime('build/miniLOL-framework.js')
@@ -158,6 +159,35 @@ task :minify do
         minified = File.new('build/miniLOL-framework.full.js', 'w')
         minified.write(File.read('build/prototype.min.js') + File.read('build/miniLOL-framework.min.js'))
         minified.close
+    end
+end
+
+task :template do
+    # HAML
+
+    updated = false
+
+    if !File.exists?('build/templates/HAML.min.js')
+        updated = true
+    else
+        ['main', 'haml'].each {|file|
+            if File.mtime("sources/templates/HAML/#{file}.js") >= File.mtime('build/templates/HAML.min.js')
+                updated = true
+                break
+            end
+        }
+    end
+
+    if updated
+        minified = File.new(`mktemp -u`.strip, 'w')
+        minified.write(File.read('sources/templates/HAML/main.js') + File.read('sources/templates/HAML/haml.js'))
+        minified.close
+
+        Helper.minify(minified.path, 'build/templates/HAML.min.js') || exit
+        Helper.miniHeader('build/templates/HAML.min.js', %{
+/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org] */
+/* haml.js (c) 2009 Tim Caswell (http://github.com/creationix/haml-js) */
+        })
     end
 end
 

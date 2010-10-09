@@ -16,37 +16,12 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-//= require "preparation"
+miniLOL.Template.Engine.add('haml', Class.create({
+    initialize: function (file) {
+        this.template = Haml.optimize(Haml.compile(file.content));
+    },
 
-/**
- *  miniLOL
- *
- *  The main miniLOL namespace.
-**/
-
-if (!Object.isObject(window.miniLOL)) {
-    window.miniLOL = {
-        error: Function.empty,
-
-        Framework: {
-            Version: '0.1'
-        }
-    };
-}
-
-//= require "Class"
-
-//= require "utils"
-
-//= require "File"
-//= require "Template"
-
-//= require "Document"
-//= require "CSS"
-
-//= require "Resource"
-//= require "JSON"
-//= require "Cookie"
-//= require "Storage"
-
-//= require "History"
+    interpolate: function (data, context) {
+        return Haml.execute(this.template, context || window, data);
+    }
+}));
