@@ -249,7 +249,7 @@ Object.extend(Function.prototype, (function () {
 
 Object.extend(Object, (function () {
     function is (klass, val) {
-        return val && (val.constructor == klass || val == klass);
+        return !Object.isUndefined(val) && (val.constructor == klass || val == klass);
     }
 
     function isObject (val) {
@@ -687,6 +687,15 @@ Object.extend(String.prototype, (function () {
         return result;
     }
 
+    function interpolate (object, pattern) {
+        if (Object.isRegExp(pattern)) {
+            return new Template(this, pattern).evaluate(object);
+        }
+        else {
+            return new miniLOL.Template(this, pattern).evaluate(object)
+        }
+    }
+
     function toNumber (integer) {
         return (integer) ? parseInt(this) : parseFloat(this);
     }
@@ -772,6 +781,7 @@ Object.extend(String.prototype, (function () {
         format:      format,
         reverse:     reverse,
         translate:   translate,
+        interpolate: interpolate,
 
         toNumber:       toNumber,
         toBase:         toBase,
@@ -1998,6 +2008,15 @@ miniLOL.File = Class.create({
         new Ajax.Request(this.path, this.options);
     },
 
+    interpolate: function (data, engine) {
+        if (engine) {
+            return this.content.interpolate(data, engine);
+        }
+        else {
+            return new miniLOL.Template(this).evaluate(data);
+        }
+    },
+
     Static: {
         extension: function (path) {
             var matches = path.match(/\.([^.]+)$/)
@@ -2030,7 +2049,7 @@ miniLOL.File = Class.create({
  ****************************************************************************/
 
 miniLOL.Template = Class.create({
-    initialize: function (template) {
+    initialize: function (template, engine) {
         if (Object.is(miniLOL.File, template)) {
             if (!template.loaded || !template.extension) {
                 throw 'The File has to be loaded and have an extension.';
@@ -2042,15 +2061,21 @@ miniLOL.Template = Class.create({
                 throw 'Engine not available for the given file.';
             }
 
-            this.template = new this.engine(template);
+            this.template = new this.engine(template.content);
         }
         else {
-            this.template = new Template(template);
+            this.engine = miniLOL.Template.Engine.get(engine) || Template;
+
+            if (!this.engine) {
+                 throw 'Engine not available for the given file.';
+            }
+
+            this.template = new this.engine(template);
         }
     },
 
-    interpolate: function (data) {
-        return this.template.interpolate(data);
+    evaluate: function (data, context) {
+        return this.template.evaluate(data, context);
     }
 });
 

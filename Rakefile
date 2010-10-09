@@ -163,8 +163,9 @@ task :minify do
 end
 
 task :template do
-    # HAML
+    Dir.mkdir('build/templates') rescue nil
 
+    # HAML
     updated = false
 
     if !File.exists?('build/templates/HAML.min.js')
@@ -187,6 +188,32 @@ task :template do
         Helper.miniHeader('build/templates/HAML.min.js', %{
 /* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org] */
 /* haml.js (c) 2009 Tim Caswell (http://github.com/creationix/haml-js) */
+        })
+    end
+
+    # Mustache
+    updated = false
+
+    if !File.exists?('build/templates/Mustache.min.js')
+        updated = true
+    else
+        ['main', 'mustache'].each {|file|
+            if File.mtime("sources/templates/Mustache/#{file}.js") >= File.mtime('build/templates/Mustache.min.js')
+                updated = true
+                break
+            end
+        }
+    end
+
+    if updated
+        minified = File.new(`mktemp -u`.strip, 'w')
+        minified.write(File.read('sources/templates/Mustache/main.js') + File.read('sources/templates/Mustache/mustache.js'))
+        minified.close
+
+        Helper.minify(minified.path, 'build/templates/Mustache.min.js') || exit
+        Helper.miniHeader('build/templates/Mustache.min.js', %{
+/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org] */
+/* mustache.js (c) 2009 Chris Wanstrath (Ruby), (c) 2010 Jan Lehnardt (JavaScript) http://github.com/janl/mustache.js */
         })
     end
 end

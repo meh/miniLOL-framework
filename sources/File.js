@@ -71,6 +71,15 @@ miniLOL.File = Class.create({
         new Ajax.Request(this.path, this.options);
     },
 
+    interpolate: function (data, engine) {
+        if (engine) {
+            return this.content.interpolate(data, engine);
+        }
+        else {
+            return new miniLOL.Template(this).evaluate(data);
+        }
+    },
+
     Static: {
         extension: function (path) {
             var matches = path.match(/\.([^.]+)$/)

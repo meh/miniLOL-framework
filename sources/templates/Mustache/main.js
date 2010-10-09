@@ -16,12 +16,12 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-miniLOL.Template.Engine.add('haml', Class.create({
+miniLOL.Template.Engine.add('mustache', Class.create({
     initialize: function (text) {
-        this.template = Haml.optimize(Haml.compile(text));
+        this.template = text;
     },
 
-    evaluate: function (data, context) {
-        return Haml.execute(this.template, context || window, data);
+    evaluate: function (data) {
+        return Mustache.to_html(this.template, data);
     }
 }));

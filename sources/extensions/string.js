@@ -245,6 +245,15 @@ Object.extend(String.prototype, (function () {
         return result;
     }
 
+    function interpolate (object, pattern) {
+        if (Object.isRegExp(pattern)) {
+            return new Template(this, pattern).evaluate(object);
+        }
+        else {
+            return new miniLOL.Template(this, pattern).evaluate(object)
+        }
+    }
+
     function toNumber (integer) {
         return (integer) ? parseInt(this) : parseFloat(this);
     }
@@ -330,6 +339,7 @@ Object.extend(String.prototype, (function () {
         format:      format,
         reverse:     reverse,
         translate:   translate,
+        interpolate: interpolate,
 
         toNumber:       toNumber,
         toBase:         toBase,

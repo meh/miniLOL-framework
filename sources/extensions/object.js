@@ -26,7 +26,7 @@
 
 Object.extend(Object, (function () {
     function is (klass, val) {
-        return val && (val.constructor == klass || val == klass);
+        return !Object.isUndefined(val) && (val.constructor == klass || val == klass);
     }
 
     function isObject (val) {
