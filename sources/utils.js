@@ -34,6 +34,10 @@ miniLOL.utils = (function () {
     }
 
     function get (path, options) {
+        options = Object.extend({
+            raw: true
+        }, options);
+
         var result;
 
         new Ajax.Request(path, Object.extend(options || {}, {
