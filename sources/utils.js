@@ -23,6 +23,7 @@ miniLOL.utils = (function () {
         new Ajax.Request(path, {
             method:       'head',
             asynchronous: false,
+            evalJS:       false,
 
             onSuccess: function () {
                 result = true;

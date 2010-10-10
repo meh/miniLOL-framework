@@ -49,17 +49,26 @@ miniLOL.Template = Class.create({
 
 miniLOL.Template.Engine = (function () {
     var _engines = {};
+    var _loaded  = {};
 
     function get (extension) {
-        return _engines[extension];
+        return _engines[(extension || '').toLowerCase()];
     }
 
     function add (extension, engine) {
-        _engines[extension] = engine;
+        if (!_engines[extension.toLowerCase()]) {
+            _engines[extension.toLowerCase()] = engine;
+        }
     }
 
-    function load (path) {
-        miniLOL.utils.execute(path);
+    function load (path, options) {
+        if (_loaded[path]) {
+            return;
+        }
+
+        miniLOL.utils.execute(path, options);
+
+        _loaded[path] = true;
     }
 
     return {
