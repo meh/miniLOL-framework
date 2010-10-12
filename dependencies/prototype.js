@@ -1,4 +1,4 @@
-/*  Prototype JavaScript framework, version 1.7_rc2
+/*  Prototype JavaScript framework, version 1.7_rc3
  *  (c) 2005-2010 Sam Stephenson
  *
  *  Prototype is freely distributable under the terms of an MIT-style license.
@@ -8,7 +8,7 @@
 
 var Prototype = {
 
-  Version: '1.7_rc2',
+  Version: '1.7_rc3',
 
   Browser: (function(){
     var ua = navigator.userAgent;
@@ -3669,6 +3669,8 @@ Element.addMethods({
   }
 
   function positionedOffset(element) {
+    var layout = element.getLayout();
+
     var valueT = 0, valueL = 0;
     do {
       valueT += element.offsetTop  || 0;
@@ -3680,6 +3682,10 @@ Element.addMethods({
         if (p !== 'static') break;
       }
     } while (element);
+
+    valueL -= layout.get('margin-top');
+    valueT -= layout.get('margin-left');
+
     return new Element.Offset(valueL, valueT);
   }
 
