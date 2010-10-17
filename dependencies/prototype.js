@@ -170,6 +170,7 @@ var Class = (function() {
       NUMBER_CLASS = '[object Number]',
       STRING_CLASS = '[object String]',
       ARRAY_CLASS = '[object Array]',
+      DATE_CLASS = '[object Date]',
       NATIVE_JSON_STRINGIFY_SUPPORT = window.JSON &&
         typeof JSON.stringify === 'function' &&
         JSON.stringify(0) === '0' &&
@@ -333,6 +334,10 @@ var Class = (function() {
     return _toString.call(object) === NUMBER_CLASS;
   }
 
+  function isDate(object) {
+    return _toString.call(object) === DATE_CLASS;
+  }
+
   function isUndefined(object) {
     return typeof object === "undefined";
   }
@@ -352,6 +357,7 @@ var Class = (function() {
     isFunction:    isFunction,
     isString:      isString,
     isNumber:      isNumber,
+    isDate:        isDate,
     isUndefined:   isUndefined
   });
 })();
@@ -1575,6 +1581,7 @@ Ajax.Request = Class.create(Ajax.Base, {
 
   getStatus: function() {
     try {
+      if (this.transport.status === 1223) return 204;
       return this.transport.status || 0;
     } catch (e) { return 0 }
   },
@@ -2462,8 +2469,6 @@ if (Prototype.Browser.Opera) {
   Element.Methods.getStyle = Element.Methods.getStyle.wrap(
     function(proceed, element, style) {
       switch (style) {
-        case 'left': case 'top': case 'right': case 'bottom':
-          if (proceed(element, 'position') === 'static') return null;
         case 'height': case 'width':
           if (!Element.visible(element)) return null;
 
@@ -3640,15 +3645,17 @@ Element.addMethods({
   }
 
   function getOffsetParent(element) {
-    if (isDetached(element)) return $(document.body);
+    element = $(element);
+
+    if (isDocument(element) || isDetached(element) || isBody(element) || isHtml(element))
+      return $(document.body);
 
     var isInline = (Element.getStyle(element, 'display') === 'inline');
     if (!isInline && element.offsetParent) return $(element.offsetParent);
-    if (element === document.body) return $(element);
 
     while ((element = element.parentNode) && element !== document.body) {
       if (Element.getStyle(element, 'position') !== 'static') {
-        return (element.nodeName === 'HTML') ? $(document.body) : $(element);
+        return isHtml(element) ? $(document.body) : $(element);
       }
     }
 
@@ -3657,6 +3664,7 @@ Element.addMethods({
 
 
   function cumulativeOffset(element) {
+    element = $(element);
     var valueT = 0, valueL = 0;
     if (element.parentNode) {
       do {
@@ -3669,6 +3677,8 @@ Element.addMethods({
   }
 
   function positionedOffset(element) {
+    element = $(element);
+
     var layout = element.getLayout();
 
     var valueT = 0, valueL = 0;
@@ -3700,6 +3710,7 @@ Element.addMethods({
   }
 
   function viewportOffset(forElement) {
+    element = $(element);
     var valueT = 0, valueL = 0, docBody = document.body;
 
     var element = forElement;
@@ -3769,7 +3780,9 @@ Element.addMethods({
     getOffsetParent = getOffsetParent.wrap(
       function(proceed, element) {
         element = $(element);
-        if (isDetached(element)) return $(document.body);
+
+        if (isDocument(element) || isDetached(element) || isBody(element) || isHtml(element))
+          return $(document.body);
 
         var position = element.getStyle('position');
         if (position !== 'static') return proceed(element);
@@ -3798,6 +3811,7 @@ Element.addMethods({
     });
   } else if (Prototype.Browser.Webkit) {
     cumulativeOffset = function(element) {
+      element = $(element);
       var valueT = 0, valueL = 0;
       do {
         valueT += element.offsetTop  || 0;
@@ -3828,6 +3842,14 @@ Element.addMethods({
 
   function isBody(element) {
     return element.nodeName.toUpperCase() === 'BODY';
+  }
+
+  function isHtml(element) {
+    return element.nodeName.toUpperCase() === 'HTML';
+  }
+
+  function isDocument(element) {
+    return element.nodeType === Node.DOCUMENT_NODE;
   }
 
   function isDetached(element) {
@@ -5284,7 +5306,8 @@ Form.EventObserver = Class.create(Abstract.EventObserver, {
     _isButton = function(event, code) {
       switch (code) {
         case 0: return event.which == 1 && !event.metaKey;
-        case 1: return event.which == 1 && event.metaKey;
+        case 1: return event.which == 2 || (event.which == 1 && event.metaKey);
+        case 2: return event.which == 3;
         default: return false;
       }
     };

@@ -268,8 +268,8 @@ Object.extend(Object, (function () {
         return Boolean(val['__miniLOL.Class__']);
     }
 
-    function isDocument (val) {
-        return val.toString().include('Document');
+    function isDocument(element) {
+        return element.nodeType === Node.DOCUMENT_NODE;
     }
 
     function isXML (val) {
