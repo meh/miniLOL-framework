@@ -1,8 +1,8 @@
-// script.aculo.us unittest.js v1.8.3, 2010-09-08 16:00:58 +0200
+// script.aculo.us unittest.js v1.9.0, 2011-01-25 15:01:33 +0100
 
-// Copyright (c) 2005-2009 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us)
-//           (c) 2005-2009 Jon Tirsen (http://www.tirsen.com)
-//           (c) 2005-2009 Michael Schuerig (http://www.schuerig.de/michael/)
+// Copyright (c) 2005-2010 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us)
+//           (c) 2005-2010 Jon Tirsen (http://www.tirsen.com)
+//           (c) 2005-2010 Michael Schuerig (http://www.schuerig.de/michael/)
 //
 // script.aculo.us is freely distributable under the terms of an MIT-style license.
 // For details, see the script.aculo.us web site: http://script.aculo.us/

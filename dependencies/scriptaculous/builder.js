@@ -1,6 +1,6 @@
-// script.aculo.us builder.js v1.8.3, 2010-09-08 16:00:58 +0200
+// script.aculo.us builder.js v1.9.0, 2011-01-25 15:01:33 +0100
 
-// Copyright (c) 2005-2009 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us)
+// Copyright (c) 2005-2010 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us)
 //
 // script.aculo.us is freely distributable under the terms of an MIT-style license.
 // For details, see the script.aculo.us web site: http://script.aculo.us/

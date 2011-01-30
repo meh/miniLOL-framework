@@ -36,7 +36,7 @@ miniLOL.utils = (function () {
     function get (path, options) {
         options = Object.extend({
             raw: true
-        }, options);
+        }, options || {});
 
         var result;
 
@@ -46,7 +46,7 @@ miniLOL.utils = (function () {
             evalJS:       false,
 
             onSuccess: function (http) {
-                if (http.request.options.raw) {
+                if (options.raw) {
                     result = http.responseText;
                 }
                 else {

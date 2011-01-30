@@ -1,8 +1,8 @@
-// script.aculo.us controls.js v1.8.3, 2010-09-08 16:00:58 +0200
+// script.aculo.us controls.js v1.9.0, 2011-01-25 15:01:33 +0100
 
-// Copyright (c) 2005-2009 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us)
-//           (c) 2005-2009 Ivan Krstic (http://blogs.law.harvard.edu/ivan)
-//           (c) 2005-2009 Jon Tirsen (http://www.tirsen.com)
+// Copyright (c) 2005-2010 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us)
+//           (c) 2005-2010 Ivan Krstic (http://blogs.law.harvard.edu/ivan)
+//           (c) 2005-2010 Jon Tirsen (http://www.tirsen.com)
 // Contributors:
 //  Richard Livsey
 //  Rahul Bhargava

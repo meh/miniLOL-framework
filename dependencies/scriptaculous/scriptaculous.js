@@ -1,6 +1,6 @@
-// script.aculo.us scriptaculous.js v1.8.3, 2010-09-08 16:00:58 +0200
+// script.aculo.us scriptaculous.js v1.9.0, 2011-01-25 15:01:33 +0100
 
-// Copyright (c) 2005-2009 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us)
+// Copyright (c) 2005-2010 Thomas Fuchs (http://script.aculo.us, http://mir.aculo.us)
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -24,7 +24,7 @@
 // For details, see the script.aculo.us web site: http://script.aculo.us/
 
 var Scriptaculous = {
-  Version: '1.8.3',
+  Version: '1.9.0',
   require: function(libraryName) {
     try{
       // inserting via DOM fails in Safari 2.0, so brute force approach

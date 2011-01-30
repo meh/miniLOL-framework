@@ -159,6 +159,10 @@ task :minify do
         minified = File.new('build/miniLOL-framework.full.js', 'w')
         minified.write(File.read('build/prototype.min.js') + File.read('build/miniLOL-framework.min.js'))
         minified.close
+
+        minified = File.new('build/miniLOL-framework.full.scriptaculous.js', 'w')
+        minified.write(File.read('build/prototype.min.js') + File.read('build/scriptaculous.min.js') + File.read('build/miniLOL-framework.min.js'))
+        minified.close
     end
 end
 

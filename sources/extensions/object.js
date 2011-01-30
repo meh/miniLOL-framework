@@ -153,7 +153,7 @@ Object.extend(Object, (function () {
     **/
     function extend (destination, source, overwrite) {
         var overwrite  = (Object.isUndefined(overwrite)) ? true : Boolean(overwrite);
-        var properties = Object.keys(source);
+        var properties = Object.keys(source || {});
 
         for (var i = 0, length = properties.length; i < length; i++) {
             var property = properties[i];

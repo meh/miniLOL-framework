@@ -1,4 +1,4 @@
-/*  Prototype JavaScript framework, version 1.7_rc3
+/*  Prototype JavaScript framework, version 1.7
  *  (c) 2005-2010 Sam Stephenson
  *
  *  Prototype is freely distributable under the terms of an MIT-style license.
@@ -8,7 +8,7 @@
 
 var Prototype = {
 
-  Version: '1.7_rc3',
+  Version: '1.7',
 
   Browser: (function(){
     var ua = navigator.userAgent;
@@ -59,27 +59,6 @@ var Prototype = {
 
 if (Prototype.Browser.MobileSafari)
   Prototype.BrowserFeatures.SpecificElementExtensions = false;
-
-
-var Abstract = { };
-
-
-var Try = {
-  these: function() {
-    var returnValue;
-
-    for (var i = 0, length = arguments.length; i < length; i++) {
-      var lambda = arguments[i];
-      try {
-        returnValue = lambda();
-        break;
-      } catch (e) { }
-    }
-
-    return returnValue;
-  }
-};
-
 /* Based on Alex Arnell's inheritance implementation. */
 
 var Class = (function() {
@@ -1086,9 +1065,10 @@ Array.from = $A;
       slice = arrayProto.slice,
       _each = arrayProto.forEach; // use native browser JS 1.6 implementation if available
 
-  function each(iterator) {
-    for (var i = 0, length = this.length; i < length; i++)
-      iterator(this[i]);
+  function each(iterator, context) {
+    for (var i = 0, length = this.length >>> 0; i < length; i++) {
+      if (i in this) iterator.call(context, this[i], i, this);
+    }
   }
   if (!_each) _each = each;
 
@@ -1294,8 +1274,14 @@ var Hash = Class.create(Enumerable, (function() {
       var key = encodeURIComponent(pair.key), values = pair.value;
 
       if (values && typeof values == 'object') {
-        if (Object.isArray(values))
-          return results.concat(values.map(toQueryPair.curry(key)));
+        if (Object.isArray(values)) {
+          var queryValues = [];
+          for (var i = 0, len = values.length, value; i < len; i++) {
+            value = values[i];
+            queryValues.push(toQueryPair(key, value));
+          }
+          return results.concat(queryValues);
+        }
       } else results.push(toQueryPair(key, values));
       return results;
     }).join('&');
@@ -1415,6 +1401,25 @@ var ObjectRange = Class.create(Enumerable, (function() {
 
 
 
+var Abstract = { };
+
+
+var Try = {
+  these: function() {
+    var returnValue;
+
+    for (var i = 0, length = arguments.length; i < length; i++) {
+      var lambda = arguments[i];
+      try {
+        returnValue = lambda();
+        break;
+      } catch (e) { }
+    }
+
+    return returnValue;
+  }
+};
+
 var Ajax = {
   getTransport: function() {
     return Try.these(
@@ -1500,11 +1505,8 @@ Ajax.Request = Class.create(Ajax.Base, {
       this.method = 'post';
     }
 
-    if (params) {
-      if (this.method == 'get')
-        this.url += (this.url.include('?') ? '&' : '?') + params;
-      else if (/Konqueror|Safari|KHTML/.test(navigator.userAgent))
-        params += '&_=';
+    if (params && this.method === 'get') {
+      this.url += (this.url.include('?') ? '&' : '?') + params;
     }
 
     this.parameters = params.toQueryParams();
@@ -1577,7 +1579,7 @@ Ajax.Request = Class.create(Ajax.Base, {
 
   success: function() {
     var status = this.getStatus();
-    return !status || (status >= 200 && status < 300);
+    return !status || (status >= 200 && status < 300) || status == 304;
   },
 
   getStatus: function() {
@@ -1967,6 +1969,21 @@ Element.Methods = {
       }
     })();
 
+    var LINK_ELEMENT_INNERHTML_BUGGY = (function() {
+      try {
+        var el = document.createElement('div');
+        el.innerHTML = "<link>";
+        var isBuggy = (el.childNodes.length === 0);
+        el = null;
+        return isBuggy;
+      } catch(e) {
+        return true;
+      }
+    })();
+
+    var ANY_INNERHTML_BUGGY = SELECT_ELEMENT_INNERHTML_BUGGY ||
+     TABLE_ELEMENT_INNERHTML_BUGGY || LINK_ELEMENT_INNERHTML_BUGGY;
+
     var SCRIPT_ELEMENT_REJECTS_TEXTNODE_APPENDING = (function () {
       var s = document.createElement("script"),
           isBuggy = false;
@@ -1980,6 +1997,7 @@ Element.Methods = {
       s = null;
       return isBuggy;
     })();
+
 
     function update(element, content) {
       element = $(element);
@@ -2004,7 +2022,7 @@ Element.Methods = {
         return element;
       }
 
-      if (SELECT_ELEMENT_INNERHTML_BUGGY || TABLE_ELEMENT_INNERHTML_BUGGY) {
+      if (ANY_INNERHTML_BUGGY) {
         if (tagName in Element._insertionTranslations.tags) {
           while (element.firstChild) {
             element.removeChild(element.firstChild);
@@ -2013,6 +2031,12 @@ Element.Methods = {
             .each(function(node) {
               element.appendChild(node)
             });
+        } else if (LINK_ELEMENT_INNERHTML_BUGGY && Object.isString(content) && content.indexOf('<link') > -1) {
+          while (element.firstChild) {
+            element.removeChild(element.firstChild);
+          }
+          var nodes = Element._getContentFromAnonymousElement(tagName, content.stripScripts(), true);
+          nodes.each(function(node) { element.appendChild(node) });
         }
         else {
           element.innerHTML = content.stripScripts();
@@ -2776,11 +2800,20 @@ Element._returnOffset = function(l, t) {
   return result;
 };
 
-Element._getContentFromAnonymousElement = function(tagName, html) {
+Element._getContentFromAnonymousElement = function(tagName, html, force) {
   var div = new Element('div'),
       t = Element._insertionTranslations.tags[tagName];
-  if (t) {
-    div.innerHTML = t[0] + html + t[1];
+
+  var workaround = false;
+  if (t) workaround = true;
+  else if (force) {
+    workaround = true;
+    t = ['', '', 0];
+  }
+
+  if (workaround) {
+    div.innerHTML = '&nbsp;' + t[0] + html + t[1];
+    div.removeChild(div.firstChild);
     for (var i = t[2]; i--; ) {
       div = div.firstChild;
     }
@@ -3293,6 +3326,11 @@ Element.addMethods({
 
       var position = element.getStyle('position'),
        width = element.getStyle('width');
+
+      if (width === "0px" || width === null) {
+        element.style.display = 'block';
+        width = element.getStyle('width');
+      }
 
       var context = (position === 'fixed') ? document.viewport :
        element.parentNode;
@@ -3922,7 +3960,6 @@ Prototype.Selector = (function() {
     extendElement: Element.extend
   };
 })();
-Prototype._original_property = window.Sizzle;
 /*!
  * Sizzle CSS Selector Engine - v1.0
  *  Copyright 2009, The Dojo Foundation
@@ -4901,6 +4938,8 @@ window.Sizzle = Sizzle;
 
 })();
 
+Prototype._original_property = window.Sizzle;
+
 ;(function(engine) {
   var extendElements = Prototype.Selector.extendElements;
 
@@ -5312,27 +5351,54 @@ Form.EventObserver = Class.create(Abstract.EventObserver, {
   var docEl = document.documentElement;
   var MOUSEENTER_MOUSELEAVE_EVENTS_SUPPORTED = 'onmouseenter' in docEl
     && 'onmouseleave' in docEl;
-  var IE_LEGACY_EVENT_SYSTEM = (window.attachEvent && !window.addEventListener);
+
+
+
+  var isIELegacyEvent = function(event) { return false; };
+
+  if (window.attachEvent) {
+    if (window.addEventListener) {
+      isIELegacyEvent = function(event) {
+        return !(event instanceof window.Event);
+      };
+    } else {
+      isIELegacyEvent = function(event) { return true; };
+    }
+  }
 
   var _isButton;
-  if (IE_LEGACY_EVENT_SYSTEM) {
-    var buttonMap = { 0: 1, 1: 4, 2: 2 };
-    _isButton = function(event, code) {
-      return event.button === buttonMap[code];
-    };
-  } else if (Prototype.Browser.WebKit) {
-    _isButton = function(event, code) {
-      switch (code) {
-        case 0: return event.which == 1 && !event.metaKey;
-        case 1: return event.which == 2 || (event.which == 1 && event.metaKey);
-        case 2: return event.which == 3;
-        default: return false;
+
+  function _isButtonForDOMEvents(event, code) {
+    return event.which ? (event.which === code + 1) : (event.button === code);
+  }
+
+  var legacyButtonMap = { 0: 1, 1: 4, 2: 2 };
+  function _isButtonForLegacyEvents(event, code) {
+    return event.button === legacyButtonMap[code];
+  }
+
+  function _isButtonForWebKit(event, code) {
+    switch (code) {
+      case 0: return event.which == 1 && !event.metaKey;
+      case 1: return event.which == 2 || (event.which == 1 && event.metaKey);
+      case 2: return event.which == 3;
+      default: return false;
+    }
+  }
+
+  if (window.attachEvent) {
+    if (!window.addEventListener) {
+      _isButton = _isButtonForLegacyEvents;
+    } else {
+      _isButton = function(event, code) {
+        return isIELegacyEvent(event) ? _isButtonForLegacyEvents(event, code) :
+         _isButtonForDOMEvents(event, code);
       }
-    };
+    }
+  } else if (Prototype.Browser.WebKit) {
+    _isButton = _isButtonForWebKit;
   } else {
-    _isButton = function(event, code) {
-      return event.which ? (event.which === code + 1) : (event.button === code);
-    };
+    _isButton = _isButtonForDOMEvents;
   }
 
   function isLeftClick(event)   { return _isButton(event, 0) }
@@ -5403,28 +5469,28 @@ Form.EventObserver = Class.create(Abstract.EventObserver, {
     event.stopped = true;
   }
 
-  Event.Methods = {
-    isLeftClick: isLeftClick,
-    isMiddleClick: isMiddleClick,
-    isRightClick: isRightClick,
 
-    element: element,
+  Event.Methods = {
+    isLeftClick:   isLeftClick,
+    isMiddleClick: isMiddleClick,
+    isRightClick:  isRightClick,
+
+    element:     element,
     findElement: findElement,
 
-    pointer: pointer,
+    pointer:  pointer,
     pointerX: pointerX,
     pointerY: pointerY,
 
     stop: stop
   };
 
-
   var methods = Object.keys(Event.Methods).inject({ }, function(m, name) {
     m[name] = Event.Methods[name].methodize();
     return m;
   });
 
-  if (IE_LEGACY_EVENT_SYSTEM) {
+  if (window.attachEvent) {
     function _relatedTarget(event) {
       var element;
       switch (event.type) {
@@ -5442,17 +5508,20 @@ Form.EventObserver = Class.create(Abstract.EventObserver, {
       return Element.extend(element);
     }
 
-    Object.extend(methods, {
+    var additionalMethods = {
       stopPropagation: function() { this.cancelBubble = true },
       preventDefault:  function() { this.returnValue = false },
       inspect: function() { return '[object Event]' }
-    });
+    };
 
     Event.extend = function(event, element) {
       if (!event) return false;
-      if (event._extendedByPrototype) return event;
 
+      if (!isIELegacyEvent(event)) return event;
+
+      if (event._extendedByPrototype) return event;
       event._extendedByPrototype = Prototype.emptyFunction;
+
       var pointer = Event.pointer(event);
 
       Object.extend(event, {
@@ -5462,12 +5531,18 @@ Form.EventObserver = Class.create(Abstract.EventObserver, {
         pageY:  pointer.y
       });
 
-      return Object.extend(event, methods);
+      Object.extend(event, methods);
+      Object.extend(event, additionalMethods);
+
+      return event;
     };
   } else {
+    Event.extend = Prototype.K;
+  }
+
+  if (window.addEventListener) {
     Event.prototype = window.Event.prototype || document.createEvent('HTMLEvents').__proto__;
     Object.extend(Event.prototype, methods);
-    Event.extend = Prototype.K;
   }
 
   function _createResponder(element, eventName, handler) {
@@ -5604,7 +5679,13 @@ Form.EventObserver = Class.create(Abstract.EventObserver, {
       return element;
     }
 
-    var responder = responders.find( function(r) { return r.handler === handler; });
+    var i = responders.length, responder;
+    while (i--) {
+      if (responders[i].handler === handler) {
+        responder = responders[i];
+        break;
+      }
+    }
     if (!responder) return element;
 
     if (eventName.include(':')) {
@@ -5676,7 +5757,7 @@ Form.EventObserver = Class.create(Abstract.EventObserver, {
     },
 
     handleEvent: function(event) {
-      var element = event.findElement(this.selector);
+      var element = Event.findElement(event, this.selector);
       if (element) this.callback.call(this.element, event, element);
     }
   });
@@ -5765,8 +5846,8 @@ Form.EventObserver = Class.create(Abstract.EventObserver, {
   Event.observe(window, 'load', fireContentLoadedEvent);
 })();
 
-Element.addMethods();
 
+Element.addMethods();
 /*------------------------------- DEPRECATED -------------------------------*/
 
 Hash.toQueryString = Object.toQueryString;
