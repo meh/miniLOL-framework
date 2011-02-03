@@ -50,7 +50,12 @@ miniLOL.utils = (function () {
                     result = http.responseText;
                 }
                 else {
-                    result = http.responseXML || http.responseText;
+                    try {
+                        result = JSON.unserialize(http.responseText);
+                    }
+                    catch (e) {
+                        result = http.responseXML || http.responseText;
+                    }
                 }
             }
         }));

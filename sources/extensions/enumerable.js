@@ -16,18 +16,14 @@
  * along with miniLOL. If not, see <http://www.gnu.org/licenses/>.
  ****************************************************************************/
 
-/**
- *  == Extensions ==
- *
- *  Extensions to built-in/Prototype objects/classes.
-**/
+Object.extend(Enumerable, (function () {
+    function empty () {
+        return this.length == 0;
+    }
 
-//= require "extensions/function"
-//= require "extensions/object"
-//= require "extensions/string"
-//= require "extensions/number"
-//= require "extensions/enumerable"
-//= require "extensions/hash"
-//= require "extensions/date"
-//= require "extensions/element"
-//= require "extensions/ajax"
+    return {
+        empty: empty
+    };
+})());
+
+Object.extend(Array.prototype, Enumerable);
