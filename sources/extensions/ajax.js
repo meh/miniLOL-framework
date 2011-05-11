@@ -7,7 +7,7 @@
  *--------------------------------------------------------------------------*/
 
 /*
- * Little modifications by meh. [http://meh.doesntexist.org | meh@paranoici.org] 
+ * Little modifications by meh. [http://meh.paranoid.pk | meh@paranoici.org] 
  * to adapt the code to miniLOL.
  */
 

@@ -99,7 +99,7 @@ task :minify do
     if tmp = Helper.minify('build/miniLOL-framework.js')
         if tmp != 1
             Helper.miniHeader('build/miniLOL-framework.min.js',
-                '/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org] */'
+                '/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.paranoid.pk | meh@paranoici.org] */'
             )
         end
     else
@@ -190,7 +190,7 @@ task :template do
 
         Helper.minify(minified.path, 'build/templates/HAML.min.js') || exit
         Helper.miniHeader('build/templates/HAML.min.js', %{
-/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org] */
+/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.paranoid.pk | meh@paranoici.org] */
 /* haml.js (c) 2009 Tim Caswell (http://github.com/creationix/haml-js) */
         })
     end
@@ -216,7 +216,7 @@ task :template do
 
         Helper.minify(minified.path, 'build/templates/Mustache.min.js') || exit
         Helper.miniHeader('build/templates/Mustache.min.js', %{
-/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.doesntexist.org | meh@paranoici.org] */
+/* miniLOL is released under AGPLv3. Copyleft meh. [http://meh.paranoid.pk | meh@paranoici.org] */
 /* mustache.js (c) 2009 Chris Wanstrath (Ruby), (c) 2010 Jan Lehnardt (JavaScript) http://github.com/janl/mustache.js */
         })
     end
