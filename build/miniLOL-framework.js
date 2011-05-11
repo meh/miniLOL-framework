@@ -1919,6 +1919,12 @@ miniLOL.utils = (function () {
     }
 
     function include (path, options) {
+        if (path.startsWith('http')) {
+          $(document.head).insert(new Element('script', { type: 'text/javascript', src: path, id: options['id'] }));
+
+          return true;
+        }
+
         var result = false;
 
         new Ajax.Request(path, Object.extend(options || {}, {
@@ -1940,6 +1946,12 @@ miniLOL.utils = (function () {
     }
 
     function require (path, options) {
+        if (path.startsWith('http')) {
+          $(document.head).insert(new Element('script', { type: 'text/javascript', src: path, id: options['id'] }));
+
+          return true;
+        }
+
         var error = false;
 
         new Ajax.Request(path, Object.extend(options || {}, {
