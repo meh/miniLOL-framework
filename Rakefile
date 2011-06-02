@@ -4,7 +4,7 @@ require 'sprockets'
 
 # You need this: http://code.google.com/closure/compiler/
 # I suggest using 20100616 version, because later versions break prototype.js on IE6
-COMPILER = 'closure-compiler' # --compilation_level ADVANCED_OPTIMIZATIONS'
+COMPILER = 'closure' # --compilation_level ADVANCED_OPTIMIZATIONS'
 
 CLEAN.include(FileList['build/**', 'sources/**/.*.pdoc.yaml', 'doc/'])
 
