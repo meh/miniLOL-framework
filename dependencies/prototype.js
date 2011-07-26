@@ -6307,7 +6307,8 @@ Form.EventObserver = Class.create(Abstract.EventObserver, {
       entries = registry[eventName];
       i = entries.length;
       while (i--)
-        removeEvent(element, eventName, entries[i].responder);
+        if (entries[i])
+          removeEvent(element, eventName, entries[i].responder);
     }
   }
 
