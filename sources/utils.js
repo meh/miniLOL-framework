@@ -106,7 +106,10 @@ miniLOL.utils = (function () {
         options = options || {};
 
         if (path.startsWith('http')) {
-          $(document.head).insert(new Element('script', { type: 'text/javascript', src: path, id: options['id'] }));
+          var element = new Element('script', { type: 'text/javascript', src: path, id: options['id'] });
+          var tmp;
+
+          $(document.head).insert(element);
 
           return true;
         }
@@ -121,6 +124,7 @@ miniLOL.utils = (function () {
             onSuccess: function (http) {
                 try {
                     window.eval(http.responseText);
+
                     result = true;
                 } catch (e) {
                     result = false;
@@ -135,7 +139,10 @@ miniLOL.utils = (function () {
         options = options || {};
 
         if (path.startsWith('http')) {
-          $(document.head).insert(new Element('script', { type: 'text/javascript', src: path, id: options['id'] }));
+          var element = new Element('script', { type: 'text/javascript', src: path, id: options['id'] });
+          var tmp;
+
+          $(document.head).insert(element);
 
           return true;
         }

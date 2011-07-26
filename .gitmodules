@@ -1,0 +1,3 @@
+[submodule "dependencies/prototype"]
+	path = dependencies/prototype
+	url = git://github.com/meh/prototype.git

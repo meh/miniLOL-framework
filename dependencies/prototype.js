@@ -2975,7 +2975,7 @@ Ajax.PeriodicalUpdater = Class.create(Ajax.Base, {
     getOpacity: getOpacity
   });
 
-  if ('styleFloat' in DIV.style) {
+  if ('styleFloat' in DIV.style && !Prototype.Browser.Opera) {
     methods.getStyle = getStyle_IE;
     methods.setOpacity = setOpacity_IE;
     methods.getOpacity = getOpacity_IE;
